@@ -677,7 +677,24 @@ ${randomSample.content}`;
                 <div class="explanation-section">
                     <h3>💡 Giải thích kết quả</h3>
                     <div class="explanation-content">
-                        ${result.explanation}
+                        <div class="explanation-summary">
+                            <p><strong>Kết luận:</strong> Email này được phân loại là <strong>${this.getClassificationLabel(result.classification)}</strong> với độ tin cậy ${Math.round(result.confidence * 100)}%.</p>
+                        </div>
+                        <div class="explanation-details" style="display: none;">
+                            <div class="explanation-toggle">
+                                <button class="btn-secondary toggle-explanation" onclick="this.parentElement.parentElement.style.display='none'; this.parentElement.previousElementSibling.style.display='block';">
+                                    🔒 Ẩn chi tiết
+                                </button>
+                            </div>
+                            <div class="detailed-explanation">
+                                ${result.explanation}
+                            </div>
+                        </div>
+                        <div class="explanation-toggle" style="display: none;">
+                            <button class="btn-secondary toggle-explanation" onclick="this.parentElement.style.display='none'; this.parentElement.previousElementSibling.style.display='block'; this.parentElement.nextElementSibling.style.display='block';">
+                                🔓 Xem chi tiết
+                            </button>
+                        </div>
                     </div>
                 </div>
 
