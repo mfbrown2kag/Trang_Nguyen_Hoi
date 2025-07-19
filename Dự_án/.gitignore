@@ -1,5 +1,11 @@
 # Email Guardian - Git Ignore File
 
+# Environment files (contain sensitive data)
+*.env
+.env
+backend/config.env
+config.env
+
 # Python
 __pycache__/
 *.py[cod]
@@ -21,14 +27,12 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # Virtual Environment
 venv/
 env/
 ENV/
-env.bak/
-venv.bak/
+.venv/
 
 # IDE
 .vscode/
@@ -47,19 +51,9 @@ ehthumbs.db
 Thumbs.db
 
 # Logs
-logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-config.env
+logs/
+log/
 
 # Database
 *.db
@@ -67,69 +61,20 @@ config.env
 *.sqlite3
 
 # Model files (if too large)
-# *.pkl
-# *.h5
-# *.model
+*.pkl
+*.pickle
+model/*.pkl
 
 # Temporary files
-tmp/
-temp/
 *.tmp
 *.temp
+temp/
+tmp/
 
-# Docker
-.dockerignore
-
-# Node modules (if any frontend build tools)
+# Node modules (if any)
 node_modules/
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# Build outputs
-build/
-dist/
-out/
-
-# Coverage reports
-htmlcov/
-.coverage
-.coverage.*
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 582
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json 
+# Backup files
+*.bak
+*.backup 
