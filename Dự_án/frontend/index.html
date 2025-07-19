@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Email Guardian - AI Powered Security</title>
+    
+    <!-- Google Fonts - Enhanced Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Removed problematic preload to fix console warnings -->
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/modern-theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/docs-layout.css">
+    <!-- <link rel="stylesheet" href="css/docs-content.css"> -->
+    <link rel="stylesheet" href="css/section-overrides.css">
+    <link rel="stylesheet" href="css/universal-theme.css">
+    <link rel="stylesheet" href="css/enhanced-components.css">
+    <link rel="stylesheet" href="css/background-effects.css">
+    <link rel="stylesheet" href="css/clear-text-override.css">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Floating Particles Background -->
+    <div class="floating-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🔍</span>
+                    <span class="logo-text">Email Guardian</span>
+                </div>
+                <nav class="nav">
+                    <a href="#analyze" class="nav-link active">Phân Tích</a>
+                    <a href="#dashboard" class="nav-link">Bảng Điều Khiển</a>
+                    <a href="#history" class="nav-link">Lịch Sử</a>
+                    <a href="#docs" class="nav-link">Hướng Dẫn</a>
+                </nav>
+                <div class="header-actions">
+                    <a href="/game_en/index.html">
+                        <button class="btn-secondary" id="demo-mode">
+                            🎮 Thử sức
+                        </button>
+                    </a>
+                    <div class="status-indicator" id="api-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Connecting...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main">
+        <div class="container">
+            <!-- Email Analysis Section -->
+            <section id="analyze" class="section active">
+                <div class="section-header floating-element">
+                    <h1>📧 Phân Tích Email Thông Minh</h1>
+                    <p>Sử dụng AI để phát hiện spam, phishing và malware trong email</p>
+                </div>
+
+                <div class="analysis-container">
+                    <!-- Input Panel -->
+                    <div class="input-panel modern-card magic-hover floating-element">
+                        <div class="panel-header">
+                            <h2>📝 Nhập Nội Dung Email</h2>
+                            <div class="quick-actions">
+                                <button class="btn-secondary" id="load-sample">📄 Mẫu Demo</button>
+                                <button class="btn-secondary" id="paste-clipboard">📋 Dán từ Clipboard</button>
+                                <button class="btn-secondary" id="clear-input">🗑️ Xóa</button>
+                            </div>
+                        </div>
+
+                        <div class="input-area">
+                            <textarea 
+                                id="email-text" 
+                                placeholder="Dán nội dung email vào đây để phân tích...&#10;&#10;Ví dụ:&#10;Subject: Urgent Action Required&#10;From: security@yourbank.com&#10;&#10;Dear Customer,&#10;Your account has been compromised..."
+                                rows="12"
+                                maxlength="10000"
+                            ></textarea>
+                            
+                            <div class="input-footer">
+                                <div class="input-info">
+                                    <span class="char-count">0/10,000 ký tự</span>
+                                    <span class="word-count">0 từ</span>
+                                </div>
+                                <button id="analyze-btn" class="btn-primary" disabled>
+                                    <span class="btn-icon">🔍</span>
+                                    <span class="btn-text">Phân Tích Email</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="input-validation" class="validation-messages"></div>
+                    </div>
+
+                    <!-- Results Panel -->
+                    <div class="results-panel modern-card magic-hover floating-element" id="results-panel">
+                        <div class="panel-header">
+                            <h2>📊 Kết Quả Phân Tích</h2>
+                            <div class="result-actions">
+                                <button class="btn-secondary" id="save-result">💾 Lưu</button>
+                                <button class="btn-secondary" id="share-result">📤 Chia sẻ</button>
+                            </div>
+                        </div>
+
+                        <div class="results-content" id="results-content">
+                            <div class="placeholder-state">
+                                <div class="placeholder-icon">🎯</div>
+                                <h3>Sẵn sàng phân tích</h3>
+                                <p>Nhập nội dung email và nhấn "Phân Tích Email" để bắt đầu</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section">
+                <div class="section-header">
+                    <h1>📊 Bảng Điều Khiển Thống Kê</h1>
+                    <p>Theo dõi hiệu suất và xu hướng phân tích email real-time</p>
+                </div>
+
+                <div class="dashboard-container">
+                    <!-- Dashboard Controls -->
+                    <div class="dashboard-controls">
+                        <div class="controls-left">
+                            <div class="time-selector">
+                                <label>📅 Khoảng thời gian:</label>
+                                <select id="time-range">
+                                    <option value="today">Hôm nay</option>
+                                    <option value="week" selected>7 ngày qua</option>
+                                    <option value="month">30 ngày qua</option>
+                                    <option value="quarter">3 tháng qua</option>
+                                </select>
+                            </div>
+                            <div class="refresh-control">
+                                <button id="refresh-dashboard" class="btn-secondary">
+                                    <span class="refresh-icon">🔄</span>
+                                    <span>Làm mới</span>
+                                </button>
+                                <div class="auto-refresh">
+                                    <input type="checkbox" id="auto-refresh" checked>
+                                    <label for="auto-refresh">Tự động làm mới (30s)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="controls-right">
+                            <div class="export-options">
+                                <button class="btn-secondary" id="export-pdf">📄 Xuất PDF</button>
+                                <button class="btn-secondary" id="export-excel">📊 Xuất Excel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card" data-trend="up">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="total-analyzed">0</div>
+                                <div class="stat-label">Tổng Phân Tích</div>
+                                <div class="stat-trend">
+                                    <span class="trend-arrow">📈</span>
+                                    <span class="trend-value">+12.5%</span>
+                                    <span class="trend-period">so với tuần trước</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card" data-trend="up">
+                            <div class="stat-icon">🚫</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="spam-detected">0</div>
+                                <div class="stat-label">Spam Phát Hiện</div>
+                                <div class="stat-trend">
+                                    <span class="trend-arrow">📈</span>
+                                    <span class="trend-value">+8.3%</span>
+                                    <span class="trend-period">so với tuần trước</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card" data-trend="up">
+                            <div class="stat-icon">🎣</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="phishing-blocked">0</div>
+                                <div class="stat-label">Phishing Chặn</div>
+                                <div class="stat-trend">
+                                    <span class="trend-arrow">📈</span>
+                                    <span class="trend-value">+15.7%</span>
+                                    <span class="trend-period">so với tuần trước</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card" data-trend="up">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="avg-confidence">0%</div>
+                                <div class="stat-label">Độ Tin Cậy TB</div>
+                                <div class="stat-trend">
+                                    <span class="trend-arrow">📈</span>
+                                    <span class="trend-value">+2.1%</span>
+                                    <span class="trend-period">so với tuần trước</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card" data-trend="down">
+                            <div class="stat-icon">⚡</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="processing-time">0ms</div>
+                                <div class="stat-label">Thời Gian Xử Lý</div>
+                                <div class="stat-trend">
+                                    <span class="trend-arrow">📉</span>
+                                    <span class="trend-value">-5.2%</span>
+                                    <span class="trend-period">so với tuần trước</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card" data-trend="up">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="success-rate">0%</div>
+                                <div class="stat-label">Tỷ Lệ Thành Công</div>
+                                <div class="stat-trend">
+                                    <span class="trend-arrow">📈</span>
+                                    <span class="trend-value">+1.8%</span>
+                                    <span class="trend-period">so với tuần trước</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="charts-section">
+                        <div class="chart-container large">
+                            <div class="chart-header">
+                                <h3>📈 Xu Hướng Phân Tích Theo Thời Gian</h3>
+                                <div class="chart-controls">
+                                    <div class="chart-legend">
+                                        <div class="legend-item">
+                                            <span class="legend-color safe"></span>
+                                            <span>An toàn</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-color spam"></span>
+                                            <span>Spam</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-color phishing"></span>
+                                            <span>Phishing</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-color suspicious"></span>
+                                            <span>Đáng nghi</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <canvas id="trend-chart"></canvas>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3>🍰 Phân Bố Loại Email</h3>
+                                <div class="chart-controls">
+                                    <select id="pie-chart-period">
+                                        <option value="today">Hôm nay</option>
+                                        <option value="week" selected>Tuần này</option>
+                                        <option value="month">Tháng này</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <canvas id="pie-chart"></canvas>
+                            <div class="pie-stats">
+                                <div class="pie-stat">
+                                    <span class="pie-color safe"></span>
+                                    <span class="pie-label">An toàn:</span>
+                                    <span class="pie-value" id="pie-safe">0</span>
+                                </div>
+                                <div class="pie-stat">
+                                    <span class="pie-color spam"></span>
+                                    <span class="pie-label">Spam:</span>
+                                    <span class="pie-value" id="pie-spam">0</span>
+                                </div>
+                                <div class="pie-stat">
+                                    <span class="pie-color phishing"></span>
+                                    <span class="pie-label">Phishing:</span>
+                                    <span class="pie-value" id="pie-phishing">0</span>
+                                </div>
+                                <div class="pie-stat">
+                                    <span class="pie-color suspicious"></span>
+                                    <span class="pie-label">Đáng nghi:</span>
+                                    <span class="pie-value" id="pie-suspicious">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Metrics -->
+                    <div class="performance-section">
+                        <div class="performance-card">
+                            <h3>⚡ Hiệu Suất Hệ Thống</h3>
+                            <div class="performance-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">CPU Usage:</span>
+                                    <div class="metric-bar">
+                                        <div class="metric-fill" style="width: 45%"></div>
+                                    </div>
+                                    <span class="metric-value">45%</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Memory:</span>
+                                    <div class="metric-bar">
+                                        <div class="metric-fill" style="width: 62%"></div>
+                                    </div>
+                                    <span class="metric-value">62%</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">API Response:</span>
+                                    <div class="metric-bar">
+                                        <div class="metric-fill" style="width: 25%"></div>
+                                    </div>
+                                    <span class="metric-value">250ms</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alerts-card">
+                            <h3>🚨 Cảnh Báo & Thông Báo</h3>
+                            <div class="alerts-list" id="alerts-list">
+                                <div class="alert-item warning">
+                                    <span class="alert-icon">⚠️</span>
+                                    <div class="alert-content">
+                                        <div class="alert-title">Tăng đột biến email spam</div>
+                                        <div class="alert-time">15 phút trước</div>
+                                    </div>
+                                </div>
+                                <div class="alert-item info">
+                                    <span class="alert-icon">ℹ️</span>
+                                    <div class="alert-content">
+                                        <div class="alert-title">Cập nhật mô hình ML thành công</div>
+                                        <div class="alert-time">2 giờ trước</div>
+                                    </div>
+                                </div>
+                                <div class="alert-item success">
+                                    <span class="alert-icon">✅</span>
+                                    <div class="alert-content">
+                                        <div class="alert-title">Đã chặn 50 email phishing</div>
+                                        <div class="alert-time">3 giờ trước</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="activity-panel">
+                        <div class="activity-header">
+                            <h3>🕐 Hoạt Động Gần Đây</h3>
+                            <div class="activity-controls">
+                                <select id="activity-filter">
+                                    <option value="all">Tất cả</option>
+                                    <option value="spam">Spam</option>
+                                    <option value="phishing">Phishing</option>
+                                    <option value="safe">An toàn</option>
+                                </select>
+                                <button class="btn-secondary" id="clear-activity">Xóa lịch sử</button>
+                            </div>
+                        </div>
+                        <div id="activity-feed" class="activity-feed">
+                            <!-- Dynamic content will be populated by JavaScript -->
+                        </div>
+                        <div class="activity-footer">
+                            <button class="btn-secondary" id="load-more-activity">Tải thêm hoạt động</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section id="history" class="section">
+                <div class="section-header">
+                    <h1>📚 Lịch Sử Phân Tích</h1>
+                    <p>Quản lý và xem lại các email đã được phân tích trước đây</p>
+                </div>
+
+                <div class="history-container">
+                    <!-- History Statistics -->
+                    <div class="history-stats">
+                        <div class="stat-card mini">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="history-total">0</div>
+                                <div class="stat-label">Tổng phân tích</div>
+                            </div>
+                        </div>
+                        <div class="stat-card mini safe">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="history-safe">0</div>
+                                <div class="stat-label">An toàn</div>
+                            </div>
+                        </div>
+                        <div class="stat-card mini spam">
+                            <div class="stat-icon">🚫</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="history-spam">0</div>
+                                <div class="stat-label">Spam</div>
+                            </div>
+                        </div>
+                        <div class="stat-card mini phishing">
+                            <div class="stat-icon">🎣</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="history-phishing">0</div>
+                                <div class="stat-label">Phishing</div>
+                            </div>
+                        </div>
+                        <div class="stat-card mini suspicious">
+                            <div class="stat-icon">⚠️</div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="history-suspicious">0</div>
+                                <div class="stat-label">Đáng nghi</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Controls -->
+                    <div class="history-controls">
+                        <div class="controls-left">
+                            <div class="search-box">
+                                <input type="text" id="search-history" placeholder="🔍 Tìm kiếm trong lịch sử...">
+                            </div>
+                            <div class="filter-group">
+                                <label>📅 Thời gian:</label>
+                                <select id="time-filter">
+                                    <option value="today">Hôm nay</option>
+                                    <option value="week">7 ngày qua</option>
+                                    <option value="month">30 ngày qua</option>
+                                    <option value="all">Tất cả</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>🏷️ Phân loại:</label>
+                                <select id="classification-filter">
+                                    <option value="all">Tất cả</option>
+                                    <option value="safe">An toàn</option>
+                                    <option value="spam">Spam</option>
+                                    <option value="phishing">Phishing</option>
+                                    <option value="suspicious">Đáng nghi</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>📊 Sắp xếp:</label>
+                                <select id="sort-history">
+                                    <option value="newest">Mới nhất</option>
+                                    <option value="oldest">Cũ nhất</option>
+                                    <option value="confidence">Độ tin cậy</option>
+                                    <option value="risk">Mức độ rủi ro</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="controls-right">
+                            <button class="btn-secondary" id="export-history">📊 Xuất Excel</button>
+                            <button class="btn-secondary" id="clear-history">🗑️ Xóa lịch sử</button>
+                        </div>
+                    </div>
+
+                    <!-- History List -->
+                    <div id="history-list" class="history-list">
+                        <!-- Dynamic content will be populated by JavaScript -->
+                    </div>
+
+                    <!-- History Pagination -->
+                    <div class="history-pagination">
+                        <button class="btn-secondary" id="load-more-history">Tải thêm</button>
+                        <span class="pagination-info">
+                            Đang hiển thị <span id="shown-count">0</span> / <span id="total-count">0</span> kết quả
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Documentation Section -->
+            <section id="docs" class="section">
+                <div class="docs-layout">
+                    <!-- Documentation Sidebar -->
+                    <div class="docs-sidebar">
+                        <div class="docs-sidebar-header">
+                            <h3 class="docs-sidebar-title">📚 Tài Liệu Hướng Dẫn</h3>
+                            <div class="docs-search">
+                                <span class="docs-search-icon">🔍</span>
+                                <input type="text" class="docs-search-input" placeholder="Tìm kiếm tài liệu..." id="docs-search">
+                            </div>
+                        </div>
+                        
+                        <div class="docs-nav-tree">
+                            <!-- Overview Section -->
+                            <div class="nav-category">
+                                <div class="nav-category-header" data-category="overview">
+                                    <span class="nav-toggle">▼</span>
+                                    <span class="nav-icon">🚀</span>
+                                    <span class="nav-title">Tổng Quan</span>
+                                </div>
+                                <div class="nav-category-content">
+                                    <!-- Basic Overview Links -->
+                                    <div class="nav-basic-links">
+                                        <div class="nav-basic-header collapsed" data-basic="overview-main">
+                                            <span class="nav-subtoggle">▶</span>
+                                            <span class="nav-title">Thông Tin Cơ Bản</span>
+                                        </div>
+                                        <div class="nav-basic-content collapsed">
+                                            <a href="#overview" class="docs-nav-link active">Giới thiệu Email Guardian</a>
+                                            <a href="#getting-started" class="docs-nav-link">Bắt đầu nhanh</a>
+                                            <a href="#features" class="docs-nav-link">Tính năng chính</a>
+                                            <a href="#system-requirements" class="docs-nav-link">Yêu cầu hệ thống</a>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Sub-category: Email Security -->
+                                    <div class="nav-subcategory">
+                                        <div class="nav-subcategory-header collapsed" data-subcategory="security">
+                                            <span class="nav-subtoggle">▶</span>
+                                            <span class="nav-icon">🔒</span>
+                                            <span class="nav-title">Bảo Mật Email</span>
+                                        </div>
+                                        <div class="nav-subcategory-links collapsed">
+                                            <a href="#email-security-intro" class="docs-nav-link">Tại sao cần bảo mật email?</a>
+                                            <a href="#email-types" class="docs-nav-link">Các loại email</a>
+                                            <a href="#common-threats" class="docs-nav-link">Các mối đe dọa phổ biến</a>
+                                            <a href="#red-flags" class="docs-nav-link">Dấu hiệu cảnh báo</a>
+                                            <a href="#prevention-strategies" class="docs-nav-link">Phương pháp phòng chống</a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sub-category: System Usage -->
+                                    <div class="nav-subcategory">
+                                        <div class="nav-subcategory-header collapsed" data-subcategory="usage">
+                                            <span class="nav-subtoggle">▶</span>
+                                            <span class="nav-icon">⚙️</span>
+                                            <span class="nav-title">Sử Dụng Hệ Thống</span>
+                                        </div>
+                                        <div class="nav-subcategory-links collapsed">
+                                            <a href="#how-to-analyze" class="docs-nav-link">Cách phân tích email</a>
+                                            <a href="#interpreting-results" class="docs-nav-link">Đọc hiểu kết quả</a>
+                                            <a href="#dashboard-guide" class="docs-nav-link">Hướng dẫn Dashboard</a>
+                                            <a href="#history-management" class="docs-nav-link">Quản lý lịch sử</a>
+                                            <a href="#api-integration" class="docs-nav-link">Tích hợp API</a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sub-category: Support -->
+                                    <div class="nav-subcategory">
+                                        <div class="nav-subcategory-header collapsed" data-subcategory="support">
+                                            <span class="nav-subtoggle">▶</span>
+                                            <span class="nav-icon">❓</span>
+                                            <span class="nav-title">Hỗ Trợ</span>
+                                        </div>
+                                        <div class="nav-subcategory-links collapsed">
+                                            <a href="#faq-general" class="docs-nav-link">Câu hỏi thường gặp</a>
+                                            <a href="#common-issues" class="docs-nav-link">Sự cố thường gặp</a>
+                                            <a href="#error-codes" class="docs-nav-link">Mã lỗi</a>
+                                            <a href="#contact-support" class="docs-nav-link">Liên hệ hỗ trợ</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documentation Content -->
+                    <div class="docs-main-content">
+                        <!-- Hero Section -->
+                        <div class="docs-hero">
+                            <div class="docs-hero-content">
+                                <h1>Email Guardian - Bảo Vệ An Toàn Email</h1>
+                                <p class="docs-hero-description">
+                                    Sử dụng trí tuệ nhân tạo tiên tiến để phát hiện và ngăn chặn spam, phishing, 
+                                    malware và các mối đe dọa email khác. Bảo vệ tổ chức và cá nhân khỏi 
+                                    các cuộc tấn công qua email.
+                                </p>
+                                <div class="docs-hero-actions">
+                                    <button class="btn-primary" onclick="manualNavigate('analyze')">🚀 Bắt Đầu Phân Tích</button>
+                                    <button class="btn-secondary" onclick="window.showNavTest()">📖 Xem Hướng Dẫn</button>
+                                </div>
+                            </div>
+                            <div class="docs-hero-image">
+                                <div class="hero-graphic">
+                                    <div class="email-shield">
+                                        <div class="shield-icon">🛡️</div>
+                                        <div class="email-icons">
+                                            <span class="email-icon safe">📧</span>
+                                            <span class="email-icon spam">📮</span>
+                                            <span class="email-icon phishing">📪</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Essentials Section -->
+                        <div class="docs-essentials">
+                            <h2>🎯 Các Tính Năng Cơ Bản</h2>
+                            <p>Bắt đầu xây dựng kiến thức bảo mật email và sử dụng Email Guardian hiệu quả</p>
+                            
+                            <div class="essentials-grid">
+                                <!-- Getting Started Card -->
+                                <div class="essential-card" onclick="showDocsContent('getting-started')">
+                                    <div class="card-icon">🚀</div>
+                                    <h3>Bắt Đầu Nhanh</h3>
+                                    <p>Học cách sử dụng Email Guardian trong 5 phút đầu tiên</p>
+                                    <div class="card-meta">
+                                        <span class="difficulty beginner">Người mới</span>
+                                        <span class="duration">5 phút</span>
+                                    </div>
+                                </div>
+
+                                <!-- Email Types Card -->
+                                <div class="essential-card" onclick="showDocsContent('email-types')">
+                                    <div class="card-icon">🏷️</div>
+                                    <h3>Phân Loại Email</h3>
+                                    <p>Tìm hiểu các loại email và cách phân biệt chúng</p>
+                                    <div class="card-meta">
+                                        <span class="difficulty intermediate">Trung bình</span>
+                                        <span class="duration">15 phút</span>
+                                    </div>
+                                </div>
+
+                                <!-- Security Basics Card -->
+                                <div class="essential-card" onclick="showDocsContent('security-principles')">
+                                    <div class="card-icon">🔒</div>
+                                    <h3>Cơ Bản Bảo Mật</h3>
+                                    <p>Nguyên tắc và thực hành bảo mật email cần thiết</p>
+                                    <div class="card-meta">
+                                        <span class="difficulty beginner">Người mới</span>
+                                        <span class="duration">10 phút</span>
+                                    </div>
+                                </div>
+
+                                <!-- Warning Signs Card -->
+                                <div class="essential-card" onclick="showDocsContent('red-flags')">
+                                    <div class="card-icon">⚠️</div>
+                                    <h3>Dấu Hiệu Cảnh Báo</h3>
+                                    <p>Nhận biết các dấu hiệu email độc hại và lừa đảo</p>
+                                    <div class="card-meta">
+                                        <span class="difficulty intermediate">Trung bình</span>
+                                        <span class="duration">20 phút</span>
+                                    </div>
+                                </div>
+
+                                <!-- Protection Methods Card -->
+                                <div class="essential-card" onclick="showDocsContent('prevention-strategies')">
+                                    <div class="card-icon">🛡️</div>
+                                    <h3>Phương Pháp Phòng Chống</h3>
+                                    <p>Chiến lược bảo vệ và phòng ngừa tấn công email</p>
+                                    <div class="card-meta">
+                                        <span class="difficulty advanced">Nâng cao</span>
+                                        <span class="duration">30 phút</span>
+                                    </div>
+                                </div>
+
+                                <!-- System Usage Card -->
+                                <div class="essential-card" onclick="showDocsContent('how-to-analyze')">
+                                    <div class="card-icon">⚙️</div>
+                                    <h3>Sử Dụng Hệ Thống</h3>
+                                    <p>Hướng dẫn chi tiết cách sử dụng tất cả tính năng</p>
+                                    <div class="card-meta">
+                                        <span class="difficulty intermediate">Trung bình</span>
+                                        <span class="duration">25 phút</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content Area for Documentation -->
+                        <div class="docs-content-area" id="docs-content-area">
+                            <!-- Dynamic content will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <span>© 2025 Email Guardian - AI-Powered Email Security</span>
+                    <span>Built for Contest 2025</span>
+                </div>
+                <div class="footer-links">
+                    <a href="#privacy">Privacy</a>
+                    <a href="#terms">Terms</a>
+                    <a href="#support">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Đang phân tích email...</div>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="loading-progress"></div>
+                </div>
+                <div class="progress-text">AI đang xử lý... 67%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div class="notification-container" id="notifications"></div>
+
+    <!-- Scripts -->
+    <script src="js/startup.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/gemini-api.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/components/dashboard.js"></script>
+    <script src="js/components/history.js"></script>
+    <script src="js/components/docs.js"></script>
+    <script src="js/emergency-nav.js"></script>
+    <script src="js/app.js"></script>
+    
+    <!-- Error Handling Script -->
+    <script>
+        // Global error handler for date adapter and other issues
+        window.addEventListener('error', function(e) {
+            if (e.message.includes('date adapter') || e.message.includes('not implemented')) {
+                console.warn('⚠️ Date adapter error suppressed:', e.message);
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Handle permissions policy violations
+        window.addEventListener('beforeunload', function(e) {
+            // Prevent default unload behavior that causes policy violations
+            e.preventDefault();
+            e.returnValue = '';
+        });
+
+        // API Connection Status Check
+        window.addEventListener('load', function() {
+            setTimeout(async function() {
+                try {
+                    const apiService = window.apiService || new APIService();
+                    const healthCheck = await apiService.checkHealth();
+                    
+                    const statusIndicator = document.getElementById('api-status');
+                    if (statusIndicator) {
+                        if (healthCheck.success) {
+                            const source = healthCheck.data?.source || 'backend';
+                            let statusText = 'Connected';
+                            let statusClass = 'connected';
+                            
+                            if (source === 'gemini') {
+                                statusText = 'Gemini AI';
+                                statusClass = 'gemini';
+                            } else if (source === 'mock') {
+                                statusText = 'Demo Mode';
+                                statusClass = 'disconnected';
+                            }
+                            
+                            statusIndicator.className = `status-indicator ${statusClass}`;
+                            statusIndicator.querySelector('.status-text').textContent = statusText;
+                        } else {
+                            statusIndicator.className = 'status-indicator disconnected';
+                            statusIndicator.querySelector('.status-text').textContent = 'Demo Mode';
+                        }
+                    }
+                } catch (error) {
+                    console.warn('⚠️ API health check failed, running in demo mode:', error.message);
+                    const statusIndicator = document.getElementById('api-status');
+                    if (statusIndicator) {
+                        statusIndicator.className = 'status-indicator disconnected';
+                        statusIndicator.querySelector('.status-text').textContent = 'Demo Mode';
+                    }
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

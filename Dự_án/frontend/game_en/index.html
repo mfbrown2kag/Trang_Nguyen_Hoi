@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Cyber Guardian Defense - Game Bảo Mật Email</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="screen">
+        <div class="loading-content">
+            <div class="cyber-logo">
+                <h1>🛡️ CYBER GUARDIAN</h1>
+                <div class="subtitle">Hệ Thống Phòng Thủ Email</div>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <div class="loading-text">Đang khởi tạo giao thức bảo mật...</div>
+        </div>
+    </div>
+
+    <!-- Main Menu -->
+    <div id="main-menu" class="screen hidden">
+        <div class="menu-content">
+            <div class="game-title">
+                <h1>🛡️ CYBER GUARDIAN</h1>
+                <p class="tagline">Bảo vệ hệ thống khỏi email độc hại!</p>
+            </div>
+            
+            <div class="menu-buttons">
+                <button id="start-game" class="menu-btn primary">
+                    🚀 BẮT ĐẦU CHƠI
+                </button>
+                <button id="tutorial-btn" class="menu-btn">
+                    📖 HƯỚNG DẪN
+                </button>
+                <button id="leaderboard-btn" class="menu-btn">
+                    🏆 BẢNG XẾP HẠNG
+                </button>
+                <button id="settings-btn" class="menu-btn">
+                    ⚙️ CÀI ĐẶT
+                </button>
+            </div>
+
+            <div class="game-info">
+                <p>🎯 <strong>Mục tiêu:</strong> Phân tích và chặn email độc hại</p>
+                <p>⏱️ <strong>Thời gian:</strong> 2 phút sinh tồn</p>
+                <p>🧠 <strong>Học hỏi:</strong> Nhận biết spam, phishing, malware</p>
+                <p>📧 <strong>Tip:</strong> Click trực tiếp email để xem thông tin!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Screen -->
+    <div id="tutorial-screen" class="screen hidden">
+        <div class="tutorial-content">
+            <h2>📖 HƯỚNG DẪN CHƠI</h2>
+            
+            <div class="tutorial-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>🎯 Mục tiêu</h3>
+                        <p>Bạn là Cyber Guardian, nhiệm vụ bảo vệ hệ thống khỏi email độc hại trong 2 phút.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>📧 Nhận diện Email</h3>
+                        <div class="email-types">
+                            <span class="email-safe">🟢 An toàn</span>
+                            <span class="email-spam">🟡 Thư rác</span>
+                            <span class="email-phishing">🔴 Lừa đảo</span>
+                            <span class="email-malware">⚫ Mã độc</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>📧 Cách thức chơi</h3>
+                        <p><strong>Click trực tiếp email:</strong> Để xem thông tin và phân tích</p>
+                        <p><strong>Chọn công cụ + Click email:</strong> Để thực hiện hành động</p>
+                        <div class="tools-grid">
+                            <div class="tool">🔍 QUÉT - Phân tích chi tiết</div>
+                            <div class="tool">🚫 CHẶN - Xóa ngay</div>
+                            <div class="tool">⚡ CÁCH LY - Di chuyển</div>
+                            <div class="tool">🛡️ KHIÊN - Bảo vệ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>⚠️ Cảnh báo</h3>
+                        <p>Nếu hệ thống health < 30%, bạn có 20 giây để phục hồi. Thua game = mất toàn bộ điểm!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tutorial-buttons">
+                <button id="back-to-menu" class="menu-btn">⬅️ Quay lại</button>
+                <button id="start-from-tutorial" class="menu-btn primary">🚀 Bắt đầu chơi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen hidden">
+        <!-- Game HUD -->
+        <div id="game-hud">
+            <div class="hud-top">
+                <div class="hud-left">
+                    <div class="stat-item">
+                        <span class="stat-label">🎯 Điểm:</span>
+                        <span id="score">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">⏱️ Thời gian:</span>
+                        <span id="timer">120</span>s
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">🔗 Combo:</span>
+                        <span id="combo">x1</span>
+                    </div>
+                </div>
+                
+                <div class="hud-center">
+                    <div class="system-health">
+                        <div class="health-label">💚 System Health</div>
+                        <div class="health-bar">
+                            <div id="health-fill" class="health-fill"></div>
+                        </div>
+                        <div id="health-percent" class="health-percent">100%</div>
+                    </div>
+                </div>
+
+                <div class="hud-right">
+                    <button id="pause-btn" class="hud-btn">⏸️</button>
+                    <button id="quit-btn" class="hud-btn">❌</button>
+                </div>
+            </div>
+
+            <!-- Tools Panel -->
+            <div id="tools-panel">
+                <button id="tool-scan" class="tool-btn" data-tool="scan">
+                    <div class="tool-icon">🔍</div>
+                    <div class="tool-name">QUÉT</div>
+                    <div class="tool-cooldown"></div>
+                </button>
+                <button id="tool-block" class="tool-btn" data-tool="block">
+                    <div class="tool-icon">🚫</div>
+                    <div class="tool-name">CHẶN</div>
+                    <div class="tool-cooldown"></div>
+                </button>
+                <button id="tool-quarantine" class="tool-btn" data-tool="quarantine">
+                    <div class="tool-icon">⚡</div>
+                    <div class="tool-name">CÁCH LY</div>
+                    <div class="tool-cooldown"></div>
+                </button>
+                <button id="tool-shield" class="tool-btn" data-tool="shield">
+                    <div class="tool-icon">🛡️</div>
+                    <div class="tool-name">KHIÊN</div>
+                    <div class="tool-cooldown"></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Canvas -->
+        <canvas id="game-canvas"></canvas>
+        
+        <!-- Background Characters -->
+        <div id="game-background">
+            <div id="system-defender" class="background-character left">
+                <img src="images/system-defender.png" alt="System Defender" id="defender-img" 
+                     onerror="this.style.display='none'">
+                <div class="character-label">🛡️ HỆ THỐNG BẢO VỆ</div>
+            </div>
+            <div id="hacker-attacker" class="background-character right">
+                <img src="images/hacker-attacker.png" alt="Hacker Attacker" id="hacker-img"
+                     onerror="this.style.display='none'">
+                <div class="character-label">⚠️ TIN TẶC TẤN CÔNG</div>
+            </div>
+        </div>
+
+        <!-- Email Info Panel -->
+        <div id="email-info" class="hidden">
+            <div class="email-header">
+                <h3>📧 Phân tích Email</h3>
+                <button id="close-email-info">❌</button>
+            </div>
+            <div class="email-content">
+                <div class="email-fields">
+                    <div class="email-field">
+                        <strong>Từ:</strong> <span id="email-from"></span>
+                    </div>
+                    <div class="email-field">
+                        <strong>Tiêu đề:</strong> <span id="email-subject"></span>
+                    </div>
+                    <div class="email-field">
+                        <strong>Nội dung:</strong> <span id="email-body"></span>
+                    </div>
+                </div>
+                <div class="email-analysis">
+                    <div class="analysis-indicators"></div>
+                    <div class="analysis-tips"></div>
+                </div>
+            </div>
+            <div class="email-actions">
+                <button class="action-btn safe" data-action="safe">✅ An toàn</button>
+                <button class="action-btn spam" data-action="spam">🟡 Thư rác</button>
+                <button class="action-btn phishing" data-action="phishing">🔴 Lừa đảo</button>
+                <button class="action-btn malware" data-action="malware">⚫ Mã độc</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over-screen" class="screen hidden">
+        <div class="game-over-content">
+            <div id="victory-result" class="result-section hidden">
+                <h2>🎉 CHIẾN THẮNG!</h2>
+                <p class="result-message">Bạn đã bảo vệ thành công hệ thống!</p>
+            </div>
+            
+            <div id="defeat-result" class="result-section hidden">
+                <h2>💥 HỆ THỐNG SUY SỤP</h2>
+                <p class="result-message">Tin tặc đã xâm nhập! Toàn bộ điểm bị mất.</p>
+            </div>
+
+            <div class="stats-summary">
+                <div class="stat-row">
+                    <span>🎯 Điểm cuối cùng:</span>
+                    <span id="final-score">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>📧 Email phân tích:</span>
+                    <span id="emails-analyzed">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>✅ Độ chính xác:</span>
+                    <span id="accuracy">0%</span>
+                </div>
+                <div class="stat-row">
+                    <span>🔗 Combo tối đa:</span>
+                    <span id="max-combo">x1</span>
+                </div>
+            </div>
+
+            <div class="achievements">
+                <h3>🏆 Thành tích</h3>
+                <div id="achievements-list"></div>
+            </div>
+
+            <div class="game-over-buttons">
+                <button id="play-again" class="menu-btn primary">🔄 Chơi lại</button>
+                <button id="back-to-main" class="menu-btn">🏠 Menu chính</button>
+                <button id="share-score" class="menu-btn">📤 Chia sẻ điểm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause Screen -->
+    <div id="pause-screen" class="screen hidden">
+        <div class="pause-content">
+            <h2>⏸️ TẠM DỪNG</h2>
+            <div class="pause-buttons">
+                <button id="resume-game" class="menu-btn primary">▶️ Tiếp tục</button>
+                <button id="restart-game" class="menu-btn">🔄 Chơi lại</button>
+                <button id="quit-to-menu" class="menu-btn">🏠 Menu chính</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Educational Popup -->
+    <div id="education-popup" class="popup hidden">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>💡 Tip Bảo mật</h3>
+                <button id="close-education">❌</button>
+            </div>
+            <div class="popup-body">
+                <div id="education-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notifications"></div>
+
+    <script src="game.js"></script>
+</body>
+</html> 
