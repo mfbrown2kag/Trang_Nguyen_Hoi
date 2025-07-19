@@ -61,9 +61,7 @@ log/
 *.sqlite3
 
 # Model files (if too large)
-# Allow ML model files (needed for deployment)
-!backend/model/*.pkl
-!model/*.pkl
+
 
 # Temporary files
 *.tmp
@@ -75,6 +73,3 @@ tmp/
 node_modules/
 npm-debug.log*
 
-# Backup files
-*.bak
-*.backup 
