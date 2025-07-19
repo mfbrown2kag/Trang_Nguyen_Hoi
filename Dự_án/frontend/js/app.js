@@ -823,10 +823,10 @@ ${randomSample.content}`;
             '../Tiếng anh/index.html',
             './Tiếng anh/index.html',
             '/Tiếng anh/index.html',
-            'http://localhost:8080/game.html',
-            'http://localhost:8080/index.html',
-            'http://127.0.0.1:8080/game.html',
-            'http://127.0.0.1:8080/index.html'
+            window.location.origin + '/game.html',
+            window.location.origin + '/index.html',
+            window.location.origin + '/game_en/game.html',
+            window.location.origin + '/game_en/index.html'
         ];
         
         const demoBtn = document.getElementById('demo-mode');

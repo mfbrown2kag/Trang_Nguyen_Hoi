@@ -3,7 +3,16 @@
 const CONFIG = {
     // API Configuration
     API: {
-        BASE_URL: 'http://127.0.0.1:8000', // Backend API server
+        // Dynamic BASE_URL - supports both development and production
+        BASE_URL: (() => {
+            // Check if running on localhost (development)
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return 'http://127.0.0.1:8000'; // Development
+            } else {
+                // Production - use relative URL or server domain
+                return window.location.origin.replace(':8080', ':8000'); // Same server, different port
+            }
+        })(),
         ENDPOINTS: {
             ANALYZE: '/api/analyze',
             STATS: '/api/stats',
