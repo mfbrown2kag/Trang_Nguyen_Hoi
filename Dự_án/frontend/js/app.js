@@ -15,6 +15,7 @@ class EmailGuardianApp {
         // Initialize core components
         this.setupEventListeners();
         this.initializeComponents();
+        this.loadUserPreferences();
         this.checkAPIStatus();
         this.loadDemoData();
         
@@ -124,6 +125,14 @@ class EmailGuardianApp {
             
             // Trigger initial validation
             this.validateInput();
+        }
+
+        // Toggle switch for detailed answers
+        const toggleDetailed = document.getElementById('show-detailed-answers');
+        if (toggleDetailed) {
+            toggleDetailed.addEventListener('change', (e) => {
+                this.updateDetailedAnswersDisplay(e.target.checked);
+            });
         }
     }
 
@@ -679,21 +688,25 @@ ${randomSample.content}`;
                     <div class="explanation-content">
                         <div class="explanation-summary">
                             <p><strong>Kết luận:</strong> Email này được phân loại là <strong>${this.getClassificationLabel(result.classification)}</strong> với độ tin cậy ${Math.round(result.confidence * 100)}%.</p>
+                            ${this.shouldShowDetailedAnswers() ? `
+                                <div class="detailed-explanation">
+                                    ${result.explanation}
+                                </div>
+                            ` : `
+                                <button class="btn-secondary toggle-explanation" onclick="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='block';">
+                                    🔓 Xem chi tiết phân tích
+                                </button>
+                            `}
                         </div>
                         <div class="explanation-details" style="display: none;">
                             <div class="explanation-toggle">
-                                <button class="btn-secondary toggle-explanation" onclick="this.parentElement.parentElement.style.display='none'; this.parentElement.previousElementSibling.style.display='block';">
+                                <button class="btn-secondary toggle-explanation" onclick="this.parentElement.parentElement.style.display='none'; this.parentElement.parentElement.previousElementSibling.style.display='block';">
                                     🔒 Ẩn chi tiết
                                 </button>
                             </div>
                             <div class="detailed-explanation">
                                 ${result.explanation}
                             </div>
-                        </div>
-                        <div class="explanation-toggle" style="display: none;">
-                            <button class="btn-secondary toggle-explanation" onclick="this.parentElement.style.display='none'; this.parentElement.previousElementSibling.style.display='block'; this.parentElement.nextElementSibling.style.display='block';">
-                                🔓 Xem chi tiết
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -727,6 +740,64 @@ ${randomSample.content}`;
             'malware': 'Malware'
         };
         return labels[classification] || 'Không xác định';
+    }
+
+    shouldShowDetailedAnswers() {
+        const toggle = document.getElementById('show-detailed-answers');
+        return toggle ? toggle.checked : true; // Default to true if toggle not found
+    }
+
+    updateDetailedAnswersDisplay(showDetailed) {
+        // Update current result display if exists
+        const resultsContent = document.getElementById('results-content');
+        if (resultsContent && resultsContent.querySelector('.result-container')) {
+            const explanationSummary = resultsContent.querySelector('.explanation-summary');
+            const explanationDetails = resultsContent.querySelector('.explanation-details');
+            
+            if (explanationSummary && explanationDetails) {
+                if (showDetailed) {
+                    // Show detailed explanation directly in summary
+                    const detailedExplanation = explanationDetails.querySelector('.detailed-explanation');
+                    if (detailedExplanation) {
+                        const existingDetailed = explanationSummary.querySelector('.detailed-explanation');
+                        if (!existingDetailed) {
+                            explanationSummary.appendChild(detailedExplanation.cloneNode(true));
+                        }
+                    }
+                    // Hide the toggle button
+                    const toggleBtn = explanationSummary.querySelector('.toggle-explanation');
+                    if (toggleBtn) {
+                        toggleBtn.style.display = 'none';
+                    }
+                } else {
+                    // Remove detailed explanation from summary
+                    const existingDetailed = explanationSummary.querySelector('.detailed-explanation');
+                    if (existingDetailed) {
+                        existingDetailed.remove();
+                    }
+                    // Show the toggle button
+                    const toggleBtn = explanationSummary.querySelector('.toggle-explanation');
+                    if (toggleBtn) {
+                        toggleBtn.style.display = 'inline-block';
+                    }
+                }
+            }
+        }
+        
+        // Save preference to localStorage
+        localStorage.setItem('showDetailedAnswers', showDetailed);
+    }
+
+    loadUserPreferences() {
+        // Load detailed answers preference
+        const showDetailed = localStorage.getItem('showDetailedAnswers');
+        if (showDetailed !== null) {
+            const toggle = document.getElementById('show-detailed-answers');
+            if (toggle) {
+                toggle.checked = showDetailed === 'true';
+                this.updateDetailedAnswersDisplay(toggle.checked);
+            }
+        }
     }
 
     saveToHistory(emailText, result) {

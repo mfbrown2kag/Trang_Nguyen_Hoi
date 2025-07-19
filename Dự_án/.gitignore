@@ -3,8 +3,8 @@
 # Environment files (contain sensitive data)
 *.env
 .env
-backend/config.env
-config.env
+
+
 
 # Python
 __pycache__/
@@ -61,7 +61,9 @@ log/
 *.sqlite3
 
 # Model files (if too large)
-
+# Allow ML model files (needed for deployment)
+!backend/model/*.pkl
+!model/*.pkl
 
 # Temporary files
 *.tmp

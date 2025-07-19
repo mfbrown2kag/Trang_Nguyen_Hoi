@@ -238,20 +238,36 @@
 
             <div class="stats-summary">
                 <div class="stat-row">
-                    <span>🎯 Điểm cuối cùng:</span>
+                    <span>🧠 Điểm cuối cùng:</span>
                     <span id="final-score">0</span>
                 </div>
                 <div class="stat-row">
-                    <span>📧 Email phân tích:</span>
+                    <span>🏆 Điểm cao nhất:</span>
+                    <span id="high-score">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>📊 Độ chính xác:</span>
+                    <span id="accuracy">0.0%</span>
+                </div>
+                <div class="stat-row">
+                    <span>🔗 Combo cao nhất:</span>
+                    <span id="max-combo">x1.0</span>
+                </div>
+                <div class="stat-row">
+                    <span>📧 Email đã phân tích:</span>
                     <span id="emails-analyzed">0</span>
                 </div>
                 <div class="stat-row">
-                    <span>✅ Độ chính xác:</span>
-                    <span id="accuracy">0%</span>
+                    <span>🧠 Phân tích đúng:</span>
+                    <span id="correct-analyzed">0</span>
                 </div>
                 <div class="stat-row">
-                    <span>🔗 Combo tối đa:</span>
-                    <span id="max-combo">x1</span>
+                    <span>⏱️ Thời gian chơi:</span>
+                    <span id="play-time">0s</span>
+                </div>
+                <div class="stat-row">
+                    <span>🔥 Phase đạt được:</span>
+                    <span id="phase-reached">0/4</span>
                 </div>
             </div>
 
@@ -261,9 +277,10 @@
             </div>
 
             <div class="game-over-buttons">
-                <button id="play-again" class="menu-btn primary">🔄 Chơi lại</button>
-                <button id="back-to-main" class="menu-btn">🏠 Menu chính</button>
-                <button id="share-score" class="menu-btn">📤 Chia sẻ điểm</button>
+                <button id="play-again" class="menu-btn primary">🔄 CHƠI LẠI</button>
+                <button id="back-to-main" class="menu-btn">🏠 MENU CHÍNH</button>
+                <button id="share-score" class="menu-btn">📤 CHIA SẺ ĐIỂM</button>
+                <button id="game-over-back-to-website" class="menu-btn" onclick="window.location.href='../Dự_án/frontend/index.html'">🌐 VỀ TRANG WEB CHÍNH</button>
             </div>
         </div>
     </div>

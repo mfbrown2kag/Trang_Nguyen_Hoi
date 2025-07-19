@@ -241,6 +241,7 @@
 .quick-actions, .result-actions {
     display: flex;
     gap: var(--space-2);
+    align-items: center;
     flex-wrap: wrap;
 }
 
@@ -248,19 +249,77 @@
 .result-actions .btn-secondary {
     padding: var(--space-2) var(--space-3);
     font-size: var(--text-sm);
-    border-radius: var(--radius-lg);
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: var(--transition-all);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .quick-actions .btn-secondary:hover,
 .result-actions .btn-secondary:hover {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: var(--primary-300);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
+}
+
+/* ===== TOGGLE SWITCH ===== */
+.toggle-switch-container {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: var(--space-2);
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--neutral-300);
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--white);
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--primary-500);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.toggle-label {
+    font-size: var(--text-sm);
+    color: var(--neutral-600);
+    font-weight: 500;
+    white-space: nowrap;
 }
 
 /* ===== INPUT AREA ===== */
@@ -509,6 +568,79 @@
     }
 }
 
+/* ===== EXPLANATION SECTION ===== */
+.explanation-section {
+    margin-top: var(--space-6);
+    padding: var(--space-4);
+    background: var(--neutral-50);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--neutral-200);
+}
+
+.explanation-section h3 {
+    color: var(--neutral-700);
+    margin-bottom: var(--space-3);
+    font-size: var(--text-lg);
+    font-weight: 600;
+}
+
+.explanation-summary {
+    background: var(--white);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--neutral-200);
+    box-shadow: var(--shadow-sm);
+}
+
+.explanation-summary p {
+    margin-bottom: var(--space-3);
+    color: var(--neutral-700);
+    line-height: var(--leading-relaxed);
+}
+
+.explanation-summary strong {
+    color: var(--neutral-900);
+    font-weight: 600;
+}
+
+.explanation-details {
+    background: var(--white);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--neutral-200);
+    box-shadow: var(--shadow-sm);
+    margin-top: var(--space-3);
+}
+
+.detailed-explanation {
+    color: var(--neutral-700);
+    line-height: var(--leading-relaxed);
+    margin-top: var(--space-3);
+}
+
+.toggle-explanation {
+    background: var(--neutral-100);
+    border: 1px solid var(--neutral-300);
+    color: var(--neutral-700);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggle-explanation:hover {
+    background: var(--neutral-200);
+    border-color: var(--neutral-400);
+    color: var(--neutral-800);
+}
+
+.explanation-toggle {
+    margin-top: var(--space-3);
+    text-align: center;
+}
+
 @media (max-width: 768px) {
     #analyze .section-header {
         border-radius: var(--radius-2xl);
@@ -570,6 +702,32 @@
     
     #analyze .result-classification {
         font-size: var(--text-lg);
+    }
+    
+    .explanation-section {
+        padding: var(--space-3);
+    }
+    
+    .explanation-summary,
+    .explanation-details {
+        padding: var(--space-3);
+    }
+    
+    .toggle-explanation {
+        width: 100%;
+        padding: var(--space-3);
+        font-size: var(--text-base);
+    }
+    
+    .toggle-switch-container {
+        margin-left: 0;
+        margin-top: var(--space-2);
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .toggle-label {
+        font-size: var(--text-xs);
     }
 }
 

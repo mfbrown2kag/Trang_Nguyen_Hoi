@@ -1596,6 +1596,7 @@ class CyberGuardianGame {
         
         // Update stats display
         this.updateGameOverStats(performance);
+        this.showAchievements();
         this.showScreen('game-over-screen');
         
         // Save high score
@@ -1890,47 +1891,15 @@ class CyberGuardianGame {
     }
 
     updateGameOverStats(performance) {
-        // Update final score display
+        // Update all stats using the existing HTML structure
         document.getElementById('final-score').textContent = performance.score.toLocaleString();
-        
-        // Add more detailed stats
-        let statsContainer = document.querySelector('.stats-summary');
-        if (statsContainer) {
-            statsContainer.innerHTML = `
-                <div class="stat-row">
-                    <span>🎯 Điểm cuối cùng:</span>
-                    <span>${performance.score.toLocaleString()}</span>
-                </div>
-                <div class="stat-row">
-                    <span>🏆 Điểm cao nhất:</span>
-                    <span>${this.getHighScore().toLocaleString()}</span>
-                </div>
-                <div class="stat-row">
-                    <span>📊 Độ chính xác:</span>
-                    <span>${performance.accuracy.toFixed(1)}%</span>
-                </div>
-                <div class="stat-row">
-                    <span>🔗 Combo cao nhất:</span>
-                    <span>x${performance.maxCombo.toFixed(1)}</span>
-                </div>
-                <div class="stat-row">
-                    <span>📧 Email đã phân tích:</span>
-                    <span>${performance.emailsAnalyzed}</span>
-                </div>
-                <div class="stat-row">
-                    <span>🎯 Phân tích đúng:</span>
-                    <span>${performance.correctAnalyses}</span>
-                </div>
-                <div class="stat-row">
-                    <span>⏱️ Thời gian chơi:</span>
-                    <span>${performance.timeElapsed}s</span>
-                </div>
-                <div class="stat-row">
-                    <span>🔥 Phase đạt được:</span>
-                    <span>${performance.phaseReached}/4</span>
-                </div>
-            `;
-        }
+        document.getElementById('high-score').textContent = this.getHighScore().toLocaleString();
+        document.getElementById('accuracy').textContent = performance.accuracy.toFixed(1) + '%';
+        document.getElementById('max-combo').textContent = 'x' + performance.maxCombo.toFixed(1);
+        document.getElementById('emails-analyzed').textContent = performance.emailsAnalyzed;
+        document.getElementById('correct-analyzed').textContent = performance.correctAnalyses;
+        document.getElementById('play-time').textContent = performance.timeElapsed + 's';
+        document.getElementById('phase-reached').textContent = performance.phaseReached + '/4';
     }
 }
 
