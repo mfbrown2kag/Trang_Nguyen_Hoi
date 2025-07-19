@@ -62,8 +62,6 @@ log/
 
 # Model files (if too large)
 
-*.pickle
-
 
 # Temporary files
 *.tmp
