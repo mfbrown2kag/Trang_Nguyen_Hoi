@@ -61,9 +61,9 @@ log/
 *.sqlite3
 
 # Model files (if too large)
-*.pkl
+
 *.pickle
-model/*.pkl
+
 
 # Temporary files
 *.tmp
