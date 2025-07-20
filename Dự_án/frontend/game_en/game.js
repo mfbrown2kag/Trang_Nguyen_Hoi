@@ -88,6 +88,7 @@ class CyberGuardianGame {
         document.getElementById('tutorial-btn').addEventListener('click', () => this.showScreen('tutorial-screen'));
         document.getElementById('back-to-menu').addEventListener('click', () => this.showScreen('main-menu'));
         document.getElementById('start-from-tutorial').addEventListener('click', () => this.startGame());
+        document.getElementById('back-to-main').addEventListener('click', () => this.goToMainPage());
         
         // Game controls
         document.getElementById('pause-btn').addEventListener('click', () => this.pauseGame());
@@ -1573,6 +1574,11 @@ class CyberGuardianGame {
         this.endGameIntervals();
         this.showScreen('main-menu');
         this.gameState = 'menu';
+    }
+    
+    goToMainPage() {
+        // Navigate back to main Email Guardian page
+        window.location.href = '../index.html';
     }
     
     endGame(victory) {

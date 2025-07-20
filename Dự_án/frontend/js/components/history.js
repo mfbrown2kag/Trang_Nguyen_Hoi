@@ -15,11 +15,11 @@ class History {
         this.init();
     }
 
-    init() {
+    async init() {
         console.log('📚 History component initializing...');
         
         this.setupEventListeners();
-        this.loadHistoryData();
+        await this.loadHistoryData();
         this.updateStatistics();
         
         console.log('✅ History component initialized');
@@ -87,15 +87,38 @@ class History {
         }
     }
 
-    loadHistoryData() {
-        // Load from localStorage or generate mock data
-        const savedHistory = Utils.getLocalStorage('email-history', []);
+    async loadHistoryData() {
+        console.log('📚 Loading history data from API...');
         
-        if (savedHistory.length > 0) {
-            this.historyData = savedHistory;
-        } else {
-            this.historyData = this.generateMockHistory();
-            this.saveHistory();
+        try {
+            // Load real data from API
+            const response = await fetch('/api/history?limit=100');
+            if (!response.ok) {
+                throw new Error('Failed to load history data');
+            }
+            
+            const data = await response.json();
+            
+            if (data.history && data.history.length > 0) {
+                this.historyData = data.history.map(item => ({
+                    id: item.id,
+                    text: item.text,
+                    classification: item.classification,
+                    confidence: item.confidence,
+                    timestamp: item.timestamp,
+                    processingTime: item.processing_time || 0,
+                    riskScore: this.calculateRiskScore(item.classification, item.confidence)
+                }));
+            } else {
+                // Fallback to empty data
+                this.historyData = [];
+            }
+            
+            console.log('✅ History data loaded from API');
+        } catch (error) {
+            console.error('❌ Error loading history data:', error);
+            // Fallback to empty data
+            this.historyData = [];
         }
 
         this.applyFilters();
@@ -362,20 +385,42 @@ class History {
 
     getClassificationIcon(classification) {
         const icons = {
+            // English labels
             'safe': '✅',
             'spam': '🚫',
             'phishing': '🎣',
-            'suspicious': '⚠️'
+            'suspicious': '⚠️',
+            // Vietnamese labels (from backend)
+            'An toàn': '✅',
+            'Lừa đảo': '🎣',
+            'Spam': '🚫',
+            'Đáng ngờ': '⚠️',
+            'Phần mềm độc hại': '🦠',
+            'Thông báo': '📢',
+            'Hóa đơn': '🧾',
+            'Khuyến mãi': '🎁',
+            'Cần xem xét thêm': '❓'
         };
         return icons[classification] || '❓';
     }
 
     getClassificationLabel(classification) {
         const labels = {
-            'safe': 'An Toàn',
+            // English labels
+            'safe': 'An toàn',
             'spam': 'Spam',
             'phishing': 'Phishing',
-            'suspicious': 'Đáng Nghi'
+            'suspicious': 'Đáng nghi',
+            // Vietnamese labels (from backend)
+            'An toàn': 'An toàn',
+            'Lừa đảo': 'Lừa đảo',
+            'Spam': 'Spam',
+            'Đáng ngờ': 'Đáng ngờ',
+            'Phần mềm độc hại': 'Phần mềm độc hại',
+            'Thông báo': 'Thông báo',
+            'Hóa đơn': 'Hóa đơn',
+            'Khuyến mãi': 'Khuyến mãi',
+            'Cần xem xét thêm': 'Cần xem xét thêm'
         };
         return labels[classification] || 'Không xác định';
     }

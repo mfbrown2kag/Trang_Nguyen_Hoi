@@ -17,15 +17,18 @@ else:
     print(f"✅ Using Google API key: {api_key[:10]}...")
     client = genai.Client(api_key=api_key)
 
-system : str = """
+def get_system_prompt(label: str) -> str:
+    return f"""
 Bạn là một chuyên gia an ninh mạng và xử lý email bằng trí tuệ nhân tạo.  
 Dưới đây là một email văn bản đã được hệ thống AI phân loại là: "{label}" (ví dụ: lừa đảo, quảng cáo, thông báo, v.v.).  
-Hãy phân tích **vì sao hệ thống đã phân loại email này như vậy** dựa trên nội dung của nó.
+Hãy phân tích vì sao hệ thống đã phân loại email này như vậy dựa trên nội dung của nó.
 
 Bạn cần:
 - Nhận diện các cụm từ, cấu trúc, dấu hiệu đặc trưng cho nhãn "{label}" trong email.
 - Giải thích logic mà một mô hình học máy có thể dùng để đưa ra quyết định này (ví dụ: ngram, từ khóa, giọng văn, mục đích).
-- Trình bày phân tích một cách ngắn gọn, logic, và dễ hiểu.
+- Trình bày phân tích một cách ngắn gọn, logic, và dễ hiểu hơn.
+- Tuyệt đối KHÔNG sử dụng dấu ** hoặc markdown formatting.
+- Sử dụng ngôn ngữ thân thiện và dễ hiểu cho người dùng.
 
 Chỉ phân tích dựa trên nội dung email, không phỏng đoán thêm ngoài văn bản.
 
@@ -51,12 +54,13 @@ class Answer_Question_From_Documents:
         {self.context}      
         Trả lời:"""
         try:
+            system_prompt = get_system_prompt(self.context)
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-1.5-flash",
                 contents= prompt,
                 config=GenerateContentConfig(
                     system_instruction=[
-                        system
+                        system_prompt
                     ]
                 )
             )

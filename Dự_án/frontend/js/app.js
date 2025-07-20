@@ -722,22 +722,44 @@ ${randomSample.content}`;
 
     getClassificationIcon(classification) {
         const icons = {
+            // English labels
             'safe': '✅',
             'suspicious': '⚠️',
             'spam': '🚫',
             'phishing': '🎣',
-            'malware': '🦠'
+            'malware': '🦠',
+            // Vietnamese labels (from backend)
+            'An toàn': '✅',
+            'Lừa đảo': '🎣',
+            'Spam': '🚫',
+            'Đáng ngờ': '⚠️',
+            'Phần mềm độc hại': '🦠',
+            'Thông báo': '📢',
+            'Hóa đơn': '🧾',
+            'Khuyến mãi': '🎁',
+            'Cần xem xét thêm': '❓'
         };
         return icons[classification] || '❓';
     }
 
     getClassificationLabel(classification) {
         const labels = {
+            // English labels
             'safe': 'An toàn',
             'suspicious': 'Đáng nghi',
             'spam': 'Spam',
             'phishing': 'Phishing',
-            'malware': 'Malware'
+            'malware': 'Malware',
+            // Vietnamese labels (from backend)
+            'An toàn': 'An toàn',
+            'Lừa đảo': 'Lừa đảo',
+            'Spam': 'Spam',
+            'Đáng ngờ': 'Đáng ngờ',
+            'Phần mềm độc hại': 'Phần mềm độc hại',
+            'Thông báo': 'Thông báo',
+            'Hóa đơn': 'Hóa đơn',
+            'Khuyến mãi': 'Khuyến mãi',
+            'Cần xem xét thêm': 'Cần xem xét thêm'
         };
         return labels[classification] || 'Không xác định';
     }
@@ -905,15 +927,10 @@ ${randomSample.content}`;
     toggleDemoMode() {
         // Thử nhiều đường dẫn khác nhau để mở game
         const possiblePaths = [
-            '../Tiếng anh/game.html',
-            './Tiếng anh/game.html',
-            '/Tiếng anh/game.html',
-            '../Tiếng anh/index.html',
-            './Tiếng anh/index.html',
-            '/Tiếng anh/index.html',
-            window.location.origin + '/game.html',
+           
+        
             window.location.origin + '/index.html',
-            window.location.origin + '/game_en/game.html',
+          
             window.location.origin + '/game_en/index.html'
         ];
         

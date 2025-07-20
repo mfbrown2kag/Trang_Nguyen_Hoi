@@ -312,63 +312,128 @@ class Dashboard {
         }
     }
 
-    updateTrendChart() {
+    async updateTrendChart(trends = null) {
         if (!this.charts.trendChart) return;
 
-        const data = this.generateMockData();
-        
-        this.charts.trendChart.data.labels = data.labels;
-        this.charts.trendChart.data.datasets[0].data = data.safe;
-        this.charts.trendChart.data.datasets[1].data = data.spam;
-        this.charts.trendChart.data.datasets[2].data = data.phishing;
-        this.charts.trendChart.data.datasets[3].data = data.suspicious;
-        
-        this.charts.trendChart.update();
+        try {
+            let data;
+            if (trends) {
+                data = trends;
+            } else {
+                // Load real trend data from API
+                const response = await fetch('/api/dashboard/trends?period=' + this.currentTimeRange);
+                if (!response.ok) {
+                    throw new Error('Failed to load trend data');
+                }
+                data = await response.json();
+            }
+            
+            this.charts.trendChart.data.labels = data.labels || [];
+            this.charts.trendChart.data.datasets[0].data = data.safe || [];
+            this.charts.trendChart.data.datasets[1].data = data.spam || [];
+            this.charts.trendChart.data.datasets[2].data = data.phishing || [];
+            this.charts.trendChart.data.datasets[3].data = data.suspicious || [];
+            
+            this.charts.trendChart.update();
+        } catch (error) {
+            console.error('❌ Error updating trend chart:', error);
+            // Fallback to empty data
+            this.charts.trendChart.data.labels = [];
+            this.charts.trendChart.data.datasets.forEach(dataset => dataset.data = []);
+            this.charts.trendChart.update();
+        }
     }
 
-    updatePieChart(period = 'week') {
+    async updatePieChart(period = 'week', distribution = null) {
         if (!this.charts.pieChart) return;
 
-        const data = this.generateMockData();
-        const totals = {
-            safe: data.safe.reduce((a, b) => a + b, 0),
-            spam: data.spam.reduce((a, b) => a + b, 0),
-            phishing: data.phishing.reduce((a, b) => a + b, 0),
-            suspicious: data.suspicious.reduce((a, b) => a + b, 0)
-        };
+        try {
+            let data;
+            if (distribution) {
+                data = distribution;
+            } else {
+                // Load real distribution data from API
+                const response = await fetch('/api/dashboard/distribution?period=' + period);
+                if (!response.ok) {
+                    throw new Error('Failed to load distribution data');
+                }
+                data = await response.json();
+            }
 
-        this.charts.pieChart.data.datasets[0].data = [
-            totals.safe,
-            totals.spam,
-            totals.phishing,
-            totals.suspicious
-        ];
+            const totals = {
+                safe: data.safe || 0,
+                spam: data.spam || 0,
+                phishing: data.phishing || 0,
+                suspicious: data.suspicious || 0
+            };
 
-        this.charts.pieChart.update();
+            this.charts.pieChart.data.datasets[0].data = [
+                totals.safe,
+                totals.spam,
+                totals.phishing,
+                totals.suspicious
+            ];
 
-        // Update pie stats
-        document.getElementById('pie-safe').textContent = totals.safe.toLocaleString();
-        document.getElementById('pie-spam').textContent = totals.spam.toLocaleString();
-        document.getElementById('pie-phishing').textContent = totals.phishing.toLocaleString();
-        document.getElementById('pie-suspicious').textContent = totals.suspicious.toLocaleString();
+            this.charts.pieChart.update();
+
+            // Update pie stats
+            const pieSafe = document.getElementById('pie-safe');
+            const pieSpam = document.getElementById('pie-spam');
+            const piePhishing = document.getElementById('pie-phishing');
+            const pieSuspicious = document.getElementById('pie-suspicious');
+            
+            if (pieSafe) pieSafe.textContent = totals.safe.toLocaleString();
+            if (pieSpam) pieSpam.textContent = totals.spam.toLocaleString();
+            if (piePhishing) piePhishing.textContent = totals.phishing.toLocaleString();
+            if (pieSuspicious) pieSuspicious.textContent = totals.suspicious.toLocaleString();
+            
+        } catch (error) {
+            console.error('❌ Error updating pie chart:', error);
+            // Fallback to empty data
+            this.charts.pieChart.data.datasets[0].data = [0, 0, 0, 0];
+            this.charts.pieChart.update();
+        }
     }
 
-    loadDashboardData() {
-        // Update main stats with animation
-        this.animateCountUp('total-analyzed', 15420);
-        this.animateCountUp('spam-detected', 3280);
-        this.animateCountUp('phishing-blocked', 892);
-        this.animateCountUp('avg-confidence', 89, '%');
-        this.animateCountUp('processing-time', 345, 'ms');
-        this.animateCountUp('success-rate', 97, '%');
+    async loadDashboardData() {
+        console.log('📊 Loading dashboard data from database...');
+        
+        try {
+            // Load real data from API
+            const response = await fetch('/api/dashboard/stats');
+            if (!response.ok) {
+                throw new Error('Failed to load dashboard data');
+            }
+            
+            const data = await response.json();
+            
+            // Update main stats with real data
+            this.animateCountUp('total-analyzed', data.total_analyzed || 0);
+            this.animateCountUp('spam-detected', data.spam_detected || 0);
+            this.animateCountUp('phishing-blocked', data.phishing_blocked || 0);
+            this.animateCountUp('avg-confidence', Math.round(data.avg_confidence || 0), '%');
+            this.animateCountUp('processing-time', Math.round(data.avg_processing_time || 0), 'ms');
+            this.animateCountUp('success-rate', Math.round(data.success_rate || 0), '%');
 
-        // Load activity feed
-        this.loadActivityFeed();
+            // Load real activity feed
+            await this.loadActivityFeed();
 
-        // Update performance metrics with animation
-        setTimeout(() => {
-            this.updatePerformanceMetrics();
-        }, 500);
+            // Update performance metrics with real data
+            setTimeout(() => {
+                this.updatePerformanceMetrics(data);
+            }, 500);
+            
+            console.log('✅ Dashboard data loaded from database');
+        } catch (error) {
+            console.error('❌ Error loading dashboard data:', error);
+            // Fallback to zero values
+            this.animateCountUp('total-analyzed', 0);
+            this.animateCountUp('spam-detected', 0);
+            this.animateCountUp('phishing-blocked', 0);
+            this.animateCountUp('avg-confidence', 0, '%');
+            this.animateCountUp('processing-time', 0, 'ms');
+            this.animateCountUp('success-rate', 0, '%');
+        }
     }
 
     animateCountUp(elementId, targetValue, suffix = '') {
@@ -397,39 +462,84 @@ class Dashboard {
         requestAnimationFrame(animate);
     }
 
-    updatePerformanceMetrics() {
+    updatePerformanceMetrics(data = {}) {
+        // Calculate real metrics from data
+        const total = data.total_analyzed || 0;
+        const spam = data.spam_detected || 0;
+        const phishing = data.phishing_blocked || 0;
+        const safe = total - spam - phishing;
+        
         const metrics = [
-            { selector: '.metric:nth-child(1) .metric-fill', width: Math.random() * 30 + 30 },
-            { selector: '.metric:nth-child(2) .metric-fill', width: Math.random() * 40 + 40 },
-            { selector: '.metric:nth-child(3) .metric-fill', width: Math.random() * 20 + 15 }
+            { selector: '.metric:nth-child(1) .metric-fill', width: total > 0 ? (safe / total) * 100 : 0 },
+            { selector: '.metric:nth-child(2) .metric-fill', width: total > 0 ? (spam / total) * 100 : 0 },
+            { selector: '.metric:nth-child(3) .metric-fill', width: total > 0 ? (phishing / total) * 100 : 0 }
         ];
 
         metrics.forEach(metric => {
             const element = document.querySelector(metric.selector);
             if (element) {
-                element.style.width = `${metric.width}%`;
+                element.style.width = `${Math.min(metric.width, 100)}%`;
             }
         });
     }
 
-    loadActivityFeed() {
+    async loadActivityFeed() {
         const activityFeed = document.getElementById('activity-feed');
         if (!activityFeed) return;
 
-        const activities = this.generateMockActivity();
-        
-        activityFeed.innerHTML = activities.map(activity => `
-            <div class="activity-item" data-type="${activity.type}">
-                <div class="activity-icon ${activity.type}">
-                    ${this.getActivityIcon(activity.type)}
+        try {
+            // Load real activity from API
+            const response = await fetch('/api/analysis/activity?limit=10');
+            if (!response.ok) {
+                throw new Error('Failed to load activity feed');
+            }
+            
+            const activities = await response.json();
+            
+            if (activities.length === 0) {
+                activityFeed.innerHTML = `
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            ℹ️
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Chưa có hoạt động</div>
+                            <div class="activity-description">Hãy phân tích email đầu tiên để bắt đầu</div>
+                        </div>
+                        <div class="activity-time">-</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            activityFeed.innerHTML = activities.map(activity => `
+                <div class="activity-item" data-type="${this.getActivityType(activity.classification)}">
+                    <div class="activity-icon ${this.getActivityType(activity.classification)}">
+                        ${this.getActivityIcon(this.getActivityType(activity.classification))}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Email ${activity.classification}</div>
+                        <div class="activity-description">${activity.email_text.substring(0, 100)}${activity.email_text.length > 100 ? '...' : ''}</div>
+                    </div>
+                    <div class="activity-time">${this.formatTime(activity.timestamp)}</div>
                 </div>
-                <div class="activity-content">
-                    <div class="activity-title">${activity.title}</div>
-                    <div class="activity-description">${activity.description}</div>
+            `).join('');
+            
+        } catch (error) {
+            console.error('❌ Error loading activity feed:', error);
+            activityFeed.innerHTML = `
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        ❌
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Lỗi tải dữ liệu</div>
+                        <div class="activity-description">Không thể tải hoạt động từ server</div>
+                    </div>
+                    <div class="activity-time">-</div>
                 </div>
-                <div class="activity-time">${activity.time}</div>
-            </div>
-        `).join('');
+            `;
+        }
     }
 
     generateMockActivity() {
@@ -475,14 +585,46 @@ class Dashboard {
         return activities;
     }
 
+    getActivityType(classification) {
+        const typeMap = {
+            'An toàn': 'safe',
+            'Lừa đảo': 'phishing',
+            'Spam': 'spam',
+            'Đáng ngờ': 'suspicious',
+            'Phần mềm độc hại': 'malware',
+            'Thông báo': 'safe',
+            'Hóa đơn': 'safe',
+            'Khuyến mãi': 'spam',
+            'Cần xem xét thêm': 'suspicious'
+        };
+        return typeMap[classification] || 'safe';
+    }
+
     getActivityIcon(type) {
         const icons = {
             'safe': '✅',
             'spam': '🚫',
             'phishing': '🎣',
-            'suspicious': '⚠️'
+            'suspicious': '⚠️',
+            'malware': '🦠'
         };
         return icons[type] || '📧';
+    }
+
+    formatTime(timestamp) {
+        const now = new Date();
+        const time = new Date(timestamp);
+        const diffMs = now - time;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return 'Vừa xong';
+        if (diffMins < 60) return `${diffMins} phút trước`;
+        if (diffHours < 24) return `${diffHours} giờ trước`;
+        if (diffDays < 7) return `${diffDays} ngày trước`;
+        
+        return time.toLocaleDateString('vi-VN');
     }
 
     filterActivity(type) {
@@ -555,7 +697,7 @@ class Dashboard {
         activityFeed.insertAdjacentHTML('beforeend', newItems);
     }
 
-    refreshDashboard(manual = false) {
+    async refreshDashboard(manual = false) {
         if (manual) {
             // Show loading state
             const refreshBtn = document.getElementById('refresh-dashboard');
@@ -575,17 +717,22 @@ class Dashboard {
             }
         }
 
-        // Refresh all data
-        this.updateTrendChart();
-        this.updatePieChart();
-        this.loadDashboardData();
-        this.loadActivityFeed();
-        this.updatePerformanceMetrics();
-
-        if (manual && window.app) {
-            setTimeout(() => {
-                window.app.showNotification('✅ Dữ liệu đã được cập nhật', 'success');
-            }, 2000);
+        try {
+            // Refresh all data
+            await this.loadDashboardData();
+            await this.updateTrendChart();
+            await this.updatePieChart(this.currentTimeRange);
+            
+            if (manual && window.app) {
+                setTimeout(() => {
+                    window.app.showNotification('✅ Dữ liệu đã được cập nhật', 'success');
+                }, 2000);
+            }
+        } catch (error) {
+            console.error('❌ Error refreshing dashboard:', error);
+            if (window.app) {
+                window.app.showNotification('❌ Lỗi khi làm mới dữ liệu', 'error');
+            }
         }
     }
 
