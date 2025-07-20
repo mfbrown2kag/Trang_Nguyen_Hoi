@@ -7,10 +7,24 @@ const CONFIG = {
         BASE_URL: (() => {
             // Check if running on localhost (development)
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                return 'http://127.0.0.1:8000'; // Development
+                // If frontend is on port 5500, backend should be on 8000
+                if (window.location.port === '5500') {
+                    return 'http://127.0.0.1:8000'; // Development with Live Server
+                } else {
+                    return 'http://127.0.0.1:8000'; // Development
+                }
             } else {
-                // Production - use relative URL or server domain
-                return window.location.origin.replace(':8080', ':8000'); // Same server, different port
+                // Production - use same server, different port for backend
+                const currentOrigin = window.location.origin;
+                const currentPort = window.location.port;
+                
+                // If frontend is on port 80/443 (HTTP/HTTPS), backend should be on 8000
+                if (!currentPort || currentPort === '80' || currentPort === '443') {
+                    return currentOrigin.replace(/:\d+/, ':8000');
+                }
+                
+                // If frontend is on other port, backend should be on 8000
+                return currentOrigin.replace(`:${currentPort}`, ':8000');
             }
         })(),
         ENDPOINTS: {

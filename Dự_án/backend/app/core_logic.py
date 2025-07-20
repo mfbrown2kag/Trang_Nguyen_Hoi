@@ -1,137 +1,304 @@
 """
-Core logic module for Email Guardian
-Extracts email analysis functionality for reuse across different interfaces
+Email Guardian Core Logic
+========================
+
+Professional email analysis engine that combines:
+- Machine Learning model for classification
+- Google AI for detailed explanations
+- Risk assessment and security recommendations
+
+Author: Email Guardian Team
+Version: 2.0.0
 """
 
 import pickle
 import os
+import logging
+from typing import Dict, Any, List
+from datetime import datetime
+
 from .gen import Answer_Question_From_Documents
 
+# Setup logging
+logger = logging.getLogger(__name__)
+
+# ============================================================================
+# EMAIL ANALYZER CLASS
+# ============================================================================
+
 class EmailAnalyzer:
-    """Core email analysis engine"""
+    """
+    Professional email analysis engine
     
-    def __init__(self, model_path="model/model_check_email.pkl"):
-        """Initialize the analyzer with ML model"""
+    This class provides comprehensive email analysis using:
+    1. ML Model: Pre-trained classifier for email types
+    2. Google AI: Detailed explanations and insights
+    3. Feature Extraction: Security-relevant features
+    4. Risk Assessment: Calculated risk scores
+    """
+    
+    def __init__(self, model_path: str = "model/model_check_email.pkl"):
+        """
+        Initialize the email analyzer
+        
+        Args:
+            model_path: Path to the ML model file
+        """
         self.model_path = model_path
         self.model = None
-        self.load_model()
+        self._load_model()
+        
+        # Security keywords for feature extraction
+        self.spam_keywords = [
+            'win', 'lottery', 'urgent', 'click here', 'free money',
+            'congratulations', 'limited time', 'act now', 'exclusive offer'
+        ]
+        
+        self.phishing_keywords = [
+            'verify', 'account', 'suspended', 'confirm', 'login',
+            'password', 'security', 'update', 'verify your account'
+        ]
+        
+        self.malware_keywords = [
+            'download', 'attachment', 'virus', 'scan', 'update software',
+            'security patch', 'system update'
+        ]
     
-    def load_model(self):
-        """Load the ML model from file"""
+    def _load_model(self) -> None:
+        """
+        Load the machine learning model from file
+        
+        Raises:
+            FileNotFoundError: If model file doesn't exist
+            Exception: If model loading fails
+        """
         try:
-            # Adjust path based on current working directory
+            # Try primary path
             if os.path.exists(self.model_path):
                 with open(self.model_path, "rb") as f:
                     self.model = pickle.load(f)
-                print(f"✅ Model loaded from {self.model_path}")
-            else:
-                # Try alternative path
-                alt_path = os.path.join("backend", self.model_path)
+                logger.info(f"✅ ML model loaded from {self.model_path}")
+                return
+            
+            # Try alternative paths
+            alt_paths = [
+                os.path.join("backend", self.model_path),
+                os.path.join(os.path.dirname(__file__), "..", "model", "model_check_email.pkl")
+            ]
+            
+            for alt_path in alt_paths:
                 if os.path.exists(alt_path):
                     with open(alt_path, "rb") as f:
                         self.model = pickle.load(f)
-                    print(f"✅ Model loaded from {alt_path}")
-                else:
-                    raise FileNotFoundError(f"Model file not found: {self.model_path}")
+                    logger.info(f"✅ ML model loaded from {alt_path}")
+                    return
+            
+            # If no model found
+            raise FileNotFoundError(f"Model file not found in any expected location")
+            
         except Exception as e:
-            print(f"❌ Error loading model: {e}")
+            logger.error(f"❌ Failed to load ML model: {e}")
             raise
     
-    def analyze_email(self, email_text):
+    def analyze_email(self, email_text: str) -> Dict[str, Any]:
         """
-        Analyze email text and return classification with AI explanation
+        Analyze email text and return comprehensive results
+        
+        This method performs:
+        1. ML classification
+        2. AI explanation generation
+        3. Feature extraction
+        4. Risk assessment
+        5. Security recommendations
         
         Args:
-            email_text (str): The email content to analyze
+            email_text: The email content to analyze
             
         Returns:
-            dict: Analysis results including classification, confidence, and explanation
+            Dictionary containing analysis results:
+            - classification: Email type (safe/spam/phishing/malware)
+            - confidence: Confidence score (0-1)
+            - explanation: AI-generated explanation
+            - features: Extracted security features
+            - risk_score: Calculated risk score (0-100)
+            - recommendations: Security recommendations
+            
+        Raises:
+            RuntimeError: If model is not loaded
+            ValueError: If email text is invalid
         """
+        # Validate inputs
         if not self.model:
-            raise RuntimeError("Model not loaded")
+            raise RuntimeError("ML model not loaded")
         
         if not email_text or not email_text.strip():
             raise ValueError("Email text cannot be empty")
         
         try:
-            # Get ML model prediction
-            predictions = self.model.predict([email_text])
-            raw_classification = predictions[0] if predictions else "unknown"
+            logger.info(f"Starting email analysis (length: {len(email_text)} chars)")
             
-            # Map to Vietnamese classification names
-            classification_map = {
-                # English labels
-                'safe': 'An toàn',
-                'spam': 'Spam',
-                'phishing': 'Lừa đảo',
-                'suspicious': 'Đáng ngờ',
-                'malware': 'Phần mềm độc hại',
-                'unknown': 'Cần xem xét thêm',
-                'notification': 'Thông báo',
-                'invoice': 'Hóa đơn',
-                'promotion': 'Khuyến mãi',
-                # Vietnamese labels (from model)
-                'Bình thường': 'An toàn',
-                'Giả mạo': 'Lừa đảo',
-                'Spam': 'Spam',
-                'Đáng ngờ': 'Đáng ngờ',
-                'Phần mềm độc hại': 'Phần mềm độc hại',
-                'Thông báo': 'Thông báo',
-                'Hóa đơn': 'Hóa đơn',
-                'Khuyến mãi': 'Khuyến mãi',
-                'An toàn': 'An toàn',
-                'Lừa đảo': 'Lừa đảo',
-                # Additional mappings for model output
-                'normal': 'An toàn',
-                'fake': 'Lừa đảo',
-                'suspicious': 'Đáng ngờ'
-            }
+            # Step 1: ML Model Classification
+            classification = self._get_ml_classification(email_text)
             
-            print(f"🔍 Debug: Raw classification from model: '{raw_classification}'")
-            print(f"🔍 Debug: Available keys in map: {list(classification_map.keys())}")
+            # Step 2: Google AI Explanation
+            explanation = self._get_ai_explanation(email_text, classification)
             
-            # Get base classification from model
-            base_classification = classification_map.get(raw_classification, 'Cần xem xét thêm')
-            
-            # Apply content-based classification rules
-            classification = self._apply_content_rules(base_classification, email_text)
-            
-            print(f"🔍 Debug: Base classification: '{base_classification}'")
-            print(f"🔍 Debug: Final classification: '{classification}'")
-            
-            # Get AI explanation using the existing Answer_Question_From_Documents
-            ai_analyzer = Answer_Question_From_Documents(email_text, classification)
-            explanation = ai_analyzer.run()
-            
-            # If AI explanation fails, provide a basic explanation
-            if explanation and (explanation.startswith("❌") or "không thể" in explanation.lower()):
-                explanation = self._generate_basic_explanation(classification, email_text)
-            
-            # Calculate confidence (placeholder - you might want to enhance this)
-            confidence = self._calculate_confidence(email_text, classification)
-            
-            # Extract features for detailed analysis
+            # Step 3: Feature Extraction
             features = self._extract_features(email_text)
             
-            return {
+            # Step 4: Confidence Calculation
+            confidence = self._calculate_confidence(email_text, classification, features)
+            
+            # Step 5: Risk Assessment
+            risk_score = self._calculate_risk_score(classification, confidence, features)
+            
+            # Step 6: Security Recommendations
+            recommendations = self._get_recommendations(classification, risk_score)
+            
+            # Create comprehensive result
+            result = {
                 "classification": classification,
                 "confidence": confidence,
                 "explanation": explanation,
                 "features": features,
-                "processing_time": 0,  # Will be calculated by API layer
-                "risk_score": self._calculate_risk_score(classification, confidence),
-                "recommendations": self._get_recommendations(classification)
+                "risk_score": risk_score,
+                "recommendations": recommendations,
+                "analysis_timestamp": datetime.now().isoformat()
             }
             
+            logger.info(f"Analysis completed - Classification: {classification}, Confidence: {confidence:.2f}")
+            return result
+            
         except Exception as e:
-            print(f"❌ Error during analysis: {e}")
+            logger.error(f"❌ Analysis failed: {e}")
             raise
     
-    def _calculate_confidence(self, email_text, classification):
-        """Calculate confidence score based on various factors"""
-        # This is a simplified confidence calculation
-        # You can enhance this based on your model's actual confidence scores
+    def _get_ml_classification(self, email_text: str) -> str:
+        """
+        Get classification from ML model with improved error handling
         
+        Args:
+            email_text: Email content
+            
+        Returns:
+            Classification string
+        """
+        try:
+            if not self.model:
+                logger.warning("ML model not loaded, using fallback classification")
+                return self._fallback_classification(email_text)
+            
+            predictions = self.model.predict([email_text])
+            classification = predictions[0] if predictions else "unknown"
+            
+            # Map model outputs to standard classifications
+            classification_map = {
+                'safe': 'safe',
+                'spam': 'spam', 
+                'phishing': 'phishing',
+                'malware': 'malware',
+                'suspicious': 'suspicious',
+                'an toàn': 'safe',
+                'lừa đảo': 'phishing',
+                'phần mềm độc hại': 'malware',
+                'đáng ngờ': 'suspicious'
+            }
+            
+            mapped_classification = classification_map.get(classification.lower(), classification)
+            logger.info(f"ML classification: {classification} -> {mapped_classification}")
+            return mapped_classification
+            
+        except Exception as e:
+            logger.warning(f"ML classification failed: {e}")
+            return self._fallback_classification(email_text)
+    
+    def _fallback_classification(self, email_text: str) -> str:
+        """
+        Fallback classification when ML model fails
+        
+        Args:
+            email_text: Email content
+            
+        Returns:
+            Fallback classification
+        """
+        email_lower = email_text.lower()
+        
+        # Simple rule-based classification
+        if any(word in email_lower for word in ['win', 'lottery', 'congratulations', 'free money']):
+            return 'spam'
+        elif any(word in email_lower for word in ['verify', 'account', 'suspended', 'login']):
+            return 'phishing'
+        elif any(word in email_lower for word in ['download', 'virus', 'scan', 'update']):
+            return 'malware'
+        elif any(word in email_lower for word in ['urgent', 'immediate', 'asap']):
+            return 'suspicious'
+        else:
+            return 'safe'
+    
+    def _get_ai_explanation(self, email_text: str, classification: str) -> str:
+        """
+        Get AI explanation using Google AI
+        
+        Args:
+            email_text: Email content
+            classification: ML classification result
+            
+        Returns:
+            AI-generated explanation
+        """
+        try:
+            ai_analyzer = Answer_Question_From_Documents(email_text, classification)
+            explanation = ai_analyzer.run()
+            
+            # Ensure explanation is not empty
+            if not explanation or explanation.strip() == "":
+                explanation = f"Email classified as {classification} based on content analysis."
+            
+            return explanation
+            
+        except Exception as e:
+            logger.warning(f"AI explanation failed: {e}")
+            return f"Email classified as {classification}. AI explanation unavailable."
+    
+    def _extract_features(self, email_text: str) -> Dict[str, Any]:
+        """
+        Extract security-relevant features from email
+        
+        Args:
+            email_text: Email content
+            
+        Returns:
+            Dictionary of extracted features
+        """
+        email_lower = email_text.lower()
+        
+        return {
+            "length": len(email_text),
+            "word_count": len(email_text.split()),
+            "has_links": "http" in email_lower or "www." in email_lower,
+            "has_attachments": "attachment" in email_lower or ".pdf" in email_lower or ".exe" in email_lower,
+            "has_urgent_words": any(word in email_lower for word in ['urgent', 'immediate', 'asap', 'now']),
+            "has_money_words": any(word in email_lower for word in ['money', 'win', 'lottery', 'prize', 'cash']),
+            "has_action_words": any(word in email_lower for word in ['click', 'verify', 'confirm', 'download']),
+            "spam_keyword_count": sum(1 for keyword in self.spam_keywords if keyword in email_lower),
+            "phishing_keyword_count": sum(1 for keyword in self.phishing_keywords if keyword in email_lower),
+            "malware_keyword_count": sum(1 for keyword in self.malware_keywords if keyword in email_lower),
+            "has_suspicious_sender": any(domain in email_lower for domain in ['@fake.com', '@suspicious.com', '@unknown.com'])
+        }
+    
+    def _calculate_confidence(self, email_text: str, classification: str, features: Dict[str, Any]) -> float:
+        """
+        Calculate confidence score based on multiple factors
+        
+        Args:
+            email_text: Email content
+            classification: ML classification
+            features: Extracted features
+            
+        Returns:
+            Confidence score (0-1)
+        """
         base_confidence = 0.85
         
         # Adjust based on email length
@@ -140,176 +307,143 @@ class EmailAnalyzer:
         elif len(email_text) > 1000:
             base_confidence += 0.05
         
-        # Adjust based on classification patterns
-        spam_keywords = ['win', 'lottery', 'urgent', 'click here', 'free money']
-        phishing_keywords = ['verify', 'account', 'suspended', 'confirm', 'login']
-        
-        email_lower = email_text.lower()
-        spam_count = sum(1 for keyword in spam_keywords if keyword in email_lower)
-        phishing_count = sum(1 for keyword in phishing_keywords if keyword in email_lower)
-        
-        # Map Vietnamese classification back to English for comparison
-        classification_map_reverse = {
-            'An toàn': 'safe',
-            'Spam': 'spam', 
-            'Lừa đảo': 'phishing',
-            'Đáng ngờ': 'suspicious',
-            'Phần mềm độc hại': 'malware',
-            'Cần xem xét thêm': 'unknown'
-        }
-        eng_classification = classification_map_reverse.get(classification, classification)
-        
-        if eng_classification == 'spam' and spam_count >= 2:
+        # Adjust based on keyword matches
+        if classification == 'spam' and features['spam_keyword_count'] >= 2:
             base_confidence += 0.1
-        elif eng_classification == 'phishing' and phishing_count >= 2:
+        elif classification == 'phishing' and features['phishing_keyword_count'] >= 2:
             base_confidence += 0.1
-        elif eng_classification == 'safe' and spam_count == 0 and phishing_count == 0:
+        elif classification == 'malware' and features['malware_keyword_count'] >= 1:
+            base_confidence += 0.15
+        elif classification == 'safe' and features['spam_keyword_count'] == 0 and features['phishing_keyword_count'] == 0:
             base_confidence += 0.05
+        
+        # Adjust based on suspicious features
+        if features['has_suspicious_sender']:
+            base_confidence -= 0.1
+        if features['has_attachments'] and classification in ['phishing', 'malware']:
+            base_confidence += 0.1
         
         return min(max(base_confidence, 0.1), 0.99)
     
-    def _apply_content_rules(self, base_classification, email_text):
-        """Apply content-based rules to improve classification"""
-        email_lower = email_text.lower()
+    def _calculate_risk_score(self, classification: str, confidence: float, features: Dict[str, Any]) -> int:
+        """
+        Calculate risk score from 0-100
         
-        # Invoice detection
-        invoice_keywords = ['invoice', 'hóa đơn', 'bill', 'payment', 'amount', 'due date', 'billing']
-        if any(keyword in email_lower for keyword in invoice_keywords):
-            return 'Hóa đơn'
-        
-        # Notification detection
-        notification_keywords = ['notification', 'thông báo', 'announcement', 'update', 'important notice']
-        if any(keyword in email_lower for keyword in notification_keywords):
-            return 'Thông báo'
-        
-        # Promotion detection
-        promotion_keywords = ['promotion', 'khuyến mãi', 'discount', 'offer', 'sale', 'limited time', 'special']
-        if any(keyword in email_lower for keyword in promotion_keywords):
-            return 'Khuyến mãi'
-        
-        # Spam detection (override safe classification)
-        spam_keywords = ['congratulations', 'winner', 'lottery', 'prize', 'free money', 'claim now', 'act now']
-        if any(keyword in email_lower for keyword in spam_keywords):
-            return 'Spam'
-        
-        # Phishing detection (override safe classification)
-        phishing_keywords = ['verify', 'confirm', 'account suspended', 'login', 'password', 'security alert']
-        if any(keyword in email_lower for keyword in phishing_keywords):
-            return 'Lừa đảo'
-        
-        # Return base classification if no specific rules match
-        return base_classification
-    
-    def _extract_features(self, email_text):
-        """Extract features from email text"""
-        email_lower = email_text.lower()
-        
-        # Check for suspicious patterns
-        urgent_words = ['urgent', 'immediate', 'asap', 'now', 'quickly', 'hurry', 'congratulations']
-        money_words = ['money', 'win', 'lottery', 'prize', 'million', 'dollar', '$', 'cash', '1000000']
-        action_words = ['click', 'verify', 'confirm', 'download', 'login', 'password', 'claim']
-        spam_words = ['free', 'limited time', 'exclusive', 'act now', 'don\'t miss', 'congratulations']
-        
-        # Count occurrences for better analysis
-        urgent_count = sum(1 for word in urgent_words if word in email_lower)
-        money_count = sum(1 for word in money_words if word in email_lower)
-        action_count = sum(1 for word in action_words if word in email_lower)
-        spam_count = sum(1 for word in spam_words if word in email_lower)
-        
-
-        
-        return {
-            "📏 Độ dài email": f"{len(email_text)} ký tự",
-            "📝 Số từ": f"{len(email_text.split())} từ",
-            "🔗 Có liên kết": "✅ Có" if "http" in email_lower else "❌ Không",
-            "⚡ Từ khóa khẩn cấp": f"⚠️ Có ({urgent_count} từ)" if urgent_count > 0 else "✅ Không",
-            "💰 Từ khóa tiền bạc": f"💸 Có ({money_count} từ)" if money_count > 0 else "✅ Không",
-            "🎯 Từ khóa hành động": f"🔧 Có ({action_count} từ)" if action_count > 0 else "✅ Không",
-            "📧 Từ khóa spam": f"🚫 Có ({spam_count} từ)" if spam_count > 0 else "✅ Không"
-        }
-    
-    def _calculate_risk_score(self, classification, confidence):
-        """Calculate risk score from 0-100"""
+        Args:
+            classification: Email classification
+            confidence: Confidence score
+            features: Extracted features
+            
+        Returns:
+            Risk score (0-100)
+        """
+        # Base risk levels
         risk_levels = {
-            'An toàn': 0,
-            'Đáng ngờ': 1,
-            'Spam': 2,
-            'Lừa đảo': 3,
-            'Phần mềm độc hại': 4,
-            'Cần xem xét thêm': 1
+            'safe': 0,
+            'suspicious': 25,
+            'spam': 50,
+            'phishing': 75,
+            'malware': 90
         }
-        base_risk = risk_levels.get(classification, 1)
-        return min(int(base_risk * confidence * 25), 100)
+        
+        base_risk = risk_levels.get(classification, 25)
+        
+        # Adjust based on confidence
+        confidence_multiplier = confidence
+        
+        # Adjust based on features
+        feature_risk = 0
+        if features['has_attachments']:
+            feature_risk += 10
+        if features['has_suspicious_sender']:
+            feature_risk += 15
+        if features['has_urgent_words']:
+            feature_risk += 5
+        
+        # Calculate final risk score
+        risk_score = int((base_risk * confidence_multiplier) + feature_risk)
+        
+        return min(max(risk_score, 0), 100)
     
-    def _generate_basic_explanation(self, classification, email_text):
-        """Generate basic explanation when AI fails"""
-        explanations = {
-            'An toàn': f"✅ Email này được phân loại là An toàn vì không chứa các dấu hiệu đáng ngờ. Bạn có thể yên tâm đọc và trả lời email này.",
-            'Spam': f"📧 Email này được phân loại là Spam vì chứa các từ khóa quảng cáo và lời hứa không thực tế. Khuyến nghị xóa email này.",
-            'Lừa đảo': f"🎣 Email này được phân loại là Lừa đảo vì yêu cầu thông tin cá nhân hoặc có liên kết đáng ngờ. TUYỆT ĐỐI KHÔNG click vào liên kết hoặc cung cấp thông tin.",
-            'Đáng ngờ': f"⚠️ Email này được phân loại là Đáng ngờ vì có một số dấu hiệu không bình thường. Hãy cẩn thận và xác minh trước khi hành động.",
-            'Phần mềm độc hại': f"🦠 Email này được phân loại là Phần mềm độc hại vì có thể chứa virus hoặc mã độc. KHÔNG mở tệp đính kèm và xóa ngay lập tức.",
-            'Cần xem xét thêm': f"❓ Email này cần xem xét thêm vì không thể phân loại rõ ràng. Hãy kiểm tra kỹ trước khi thực hiện bất kỳ hành động nào.",
-            'Thông báo': f"📢 Email này được phân loại là Thông báo chính thức. Bạn có thể đọc và thực hiện theo hướng dẫn.",
-            'Hóa đơn': f"🧾 Email này được phân loại là Hóa đơn thanh toán. Hãy kiểm tra thông tin thanh toán cẩn thận.",
-            'Khuyến mãi': f"🎉 Email này được phân loại là Khuyến mãi. Hãy kiểm tra tính hợp lệ của chương trình trước khi tham gia."
-        }
-        return explanations.get(classification, f"📊 Email này được phân loại là {classification}. Hãy kiểm tra kỹ trước khi thực hiện bất kỳ hành động.")
-    
-    def _get_recommendations(self, classification):
-        """Get security recommendations based on classification"""
-        recommendations = {
-            'An toàn': ['✅ Email an toàn, có thể đọc và trả lời bình thường'],
-            'Đáng ngờ': [
-                '🔍 Xác minh danh tính người gửi trước khi trả lời',
-                '⚠️ Tránh click vào các liên kết đáng ngờ',
-                '📋 Kiểm tra các yêu cầu bất thường'
+    def _get_recommendations(self, classification: str, risk_score: int) -> List[str]:
+        """
+        Get security recommendations based on classification and risk
+        
+        Args:
+            classification: Email classification
+            risk_score: Calculated risk score
+            
+        Returns:
+            List of security recommendations
+        """
+        base_recommendations = {
+            'safe': [
+                '✅ Email appears safe to read and respond to',
+                '📧 Verify sender identity if unsure',
+                '🔍 Check for any unusual requests'
             ],
-            'Spam': [
-                '🗑️ Xóa email ngay lập tức',
-                '🏷️ Đánh dấu là spam',
-                '❌ Không trả lời hoặc click vào bất kỳ liên kết nào'
+            'suspicious': [
+                '⚠️ Exercise caution with this email',
+                '🔍 Verify sender identity before responding',
+                '🚫 Avoid clicking suspicious links',
+                '📧 Check for unusual requests or demands'
             ],
-            'Lừa đảo': [
-                '🚫 TUYỆT ĐỐI KHÔNG click vào bất kỳ liên kết nào',
-                '🔒 Không cung cấp thông tin cá nhân',
-                '📞 Báo cáo cho đội bảo mật IT',
-                '🗑️ Xóa ngay lập tức'
+            'spam': [
+                '🗑️ Delete email immediately',
+                '🚫 Do not reply or click any links',
+                '📧 Mark as spam in your email client',
+                '🔒 Consider blocking the sender'
             ],
-            'Phần mềm độc hại': [
-                '🚨 Cách ly ngay lập tức',
-                '🛡️ Chạy quét virus toàn hệ thống',
-                '📞 Liên hệ đội bảo mật',
-                '📎 Không mở bất kỳ tệp đính kèm nào'
+            'phishing': [
+                '🚨 DO NOT click any links',
+                '🚫 Do not provide any personal information',
+                '📧 Report to IT security team immediately',
+                '🗑️ Delete email immediately',
+                '🔒 Change passwords if you clicked anything'
             ],
-            'Cần xem xét thêm': [
-                '🔍 Kiểm tra kỹ nội dung email',
-                '📧 Xác minh nguồn gốc',
-                '⏰ Không vội vàng thực hiện yêu cầu'
-            ],
-            'Thông báo': [
-                '📢 Email thông báo chính thức',
-                '✅ Có thể đọc và thực hiện theo hướng dẫn'
-            ],
-            'Hóa đơn': [
-                '🧾 Email hóa đơn thanh toán',
-                '💰 Kiểm tra thông tin thanh toán',
-                '📅 Ghi nhớ ngày hạn thanh toán'
-            ],
-            'Khuyến mãi': [
-                '🎉 Email khuyến mãi từ doanh nghiệp',
-                '🔍 Kiểm tra tính hợp lệ của chương trình',
-                '⚠️ Cẩn thận với các ưu đãi quá hấp dẫn'
+            'malware': [
+                '🚨 QUARANTINE immediately',
+                '🛡️ Run full system virus scan',
+                '📞 Contact security team immediately',
+                '🚫 Do not open any attachments',
+                '💻 Check for unauthorized access'
             ]
         }
-        return recommendations.get(classification, ['❓ Cần xem xét thêm'])
+        
+        recommendations = base_recommendations.get(classification, ['Requires further review'])
+        
+        # Add risk-based recommendations
+        if risk_score >= 80:
+            recommendations.insert(0, '🚨 HIGH RISK: Immediate action required')
+        elif risk_score >= 60:
+            recommendations.insert(0, '⚠️ MEDIUM RISK: Exercise extreme caution')
+        
+        return recommendations
 
-# Global analyzer instance
+# ============================================================================
+# GLOBAL ANALYZER INSTANCE
+# ============================================================================
+
 _analyzer_instance = None
 
-def get_analyzer():
-    """Get or create the global analyzer instance"""
+def get_analyzer() -> EmailAnalyzer:
+    """
+    Get or create the global analyzer instance
+    
+    Returns:
+        EmailAnalyzer instance
+        
+    Raises:
+        Exception: If analyzer initialization fails
+    """
     global _analyzer_instance
+    
     if _analyzer_instance is None:
-        _analyzer_instance = EmailAnalyzer()
+        try:
+            _analyzer_instance = EmailAnalyzer()
+            logger.info("✅ Global analyzer instance created")
+        except Exception as e:
+            logger.error(f"❌ Failed to create analyzer instance: {e}")
+            raise
+    
     return _analyzer_instance 
